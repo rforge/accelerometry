@@ -41,9 +41,14 @@ Some additional information on the package accelerometry and its functions can b
 \code{\link{movingaves}}
 }
 \examples{
+# Load in sample data frame
 data(testdata)
-counts.part1.saturday = testdata[testdata[,"seqn"]==21005 & testdata[,"paxday"]==7,"paxinten"]
-hourly.averages = blockaves(x=counts.part1.saturday, window=60)
+
+# Get data from ID number 21005, Saturday only
+counts.saturday <- testdata[testdata[,"seqn"]==21005 & testdata[,"paxday"]==7,"paxinten"]
+
+# Calculate and plot hourly count averages
+hourly.averages <- blockaves(x = counts.saturday, window = 60)
 plot(hourly.averages)
 }
 \keyword{ accelerometry }

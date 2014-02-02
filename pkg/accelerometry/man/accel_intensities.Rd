@@ -7,7 +7,7 @@ Classification of physical activity intensities
 This function computes the number of minutes with counts in user-defined intensity levels, and the number of counts accumulated during time spent in each intensity level. It is intended for use with uniaxial minute-to-minute accelerometer data.
 }
 \usage{
-accel.intensities(counts, thresh=c(100,760,2020,5999), skipchecks=FALSE)
+accel.intensities(counts, thresh = c(100,760,2020,5999), skipchecks = FALSE)
 }
 \arguments{
   \item{counts}{
@@ -40,10 +40,17 @@ Some additional information on the package accelerometry and its functions can b
 \code{\link{accel.weartime}}, \code{\link{accel.process}}
 }
 \examples{
+# Load in sample data frame
 data(testdata)
-counts.part1 = testdata[testdata[,"seqn"]==21005,"paxinten"]
-counts.part1.weartime = counts.part1[accel.weartime(counts=counts.part1)==1]
-intensity.variables = accel.intensities(counts=counts.part1.weartime)
+
+# Get data from ID number 21005
+counts.part1 <- testdata[testdata[,"seqn"]==21005,"paxinten"]
+
+# Create vector of counts during valid wear time only
+counts.part1.weartime <- counts.part1[accel.weartime(counts = counts.part1)==1]
+
+# Calculate physical activity intensity variables
+intensity.variables <- accel.intensities(counts = counts.part1.weartime)
 }
 \keyword{ accelerometry }
 \keyword{ intensity }

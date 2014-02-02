@@ -19,14 +19,17 @@ This dataset is used to illustrate the various functions in the package accelero
 NA
 }
 \source{
-The data is for from five participants in NHANES 2003-2004 (see reference). The full dataset is available at: \url{http://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=Examination&CycleBeginYear=2003}
+The data is for from five participants in NHANES 2003-2004 [1]. The full dataset is available at: \url{http://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=Examination&CycleBeginYear=2003}
 }
 \references{
-Centers for Disease Control and Prevention (CDC). National Center for Health Statistics (NCHS). National Health and Nutrition Examination Survey Data. Hyattsville, MD: US Department of Health and Human Services, Centers for Disease Control and Prevention, 2003-6 \url{http://www.cdc.gov/nchs/nhanes/nhanes_questionnaires.htm}. Accessed August 12, 2013.
+1. Centers for Disease Control and Prevention (CDC). National Center for Health Statistics (NCHS). National Health and Nutrition Examination Survey Data. Hyattsville, MD: US Department of Health and Human Services, Centers for Disease Control and Prevention, 2003-6 \url{http://www.cdc.gov/nchs/nhanes/nhanes_questionnaires.htm}. Accessed February 1, 2014.
 }
 \examples{
+# Load in sample data frame
 data(testdata)
-counts.part3 = testdata[testdata[,"seqn"]==21007,"paxinten"]
+
+# Plot full week of data from ID number 21007
+counts.part3 <- testdata[testdata[,"seqn"]==21007,"paxinten"]
 plot(counts.part3)
 }
 \keyword{datasets}
