@@ -7,7 +7,8 @@ Sedentary breaks detection
 This function identifies sedentary breaks in uniaxial minute-to-minute accelerometer data.
 }
 \usage{
-accel.sedbreaks(counts, weartime = NULL, thresh = 100, return.flags = FALSE, skipchecks = FALSE)
+accel.sedbreaks(counts, weartime = NULL, thresh = 100, return.flags = FALSE, 
+                skipchecks = FALSE)
 }
 \arguments{
   \item{counts}{

@@ -530,7 +530,7 @@ accel.process <- function(counts, steps = NULL, days = NULL, id = NULL, brevity 
                          active.bout.tol = 0, mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0,
                          active.bout.nci = FALSE, sed.bout.tol = 0, sed.bout.tol.maximum = int.cuts[2]-1,
                          artifact.thresh = 25000, artifact.action = 1, weekday.weekend = FALSE, 
-                         return.form = 1) {
+                         return.form = 2) {
     
   # If counts is a character, output error
   if (is.character(counts)) {
@@ -894,8 +894,11 @@ accel.process <- function(counts, steps = NULL, days = NULL, id = NULL, brevity 
                         "cpm_hour19","cpm_hour20","cpm_hour21","cpm_hour22","cpm_hour23","cpm_hour24")
   
   # Drop variables according to brevity setting
-  if (brevity==1) {dayvars = dayvars[,1:6]}
-  else if (brevity==2) {dayvars = dayvars[,1:42]}
+  if (brevity==1) {
+    dayvars = dayvars[,1:6]
+  } else if (brevity==2) {
+    dayvars = dayvars[,1:42]
+  }
   if (brevity>1 & is.null(steps)) {dayvars = dayvars[,c(1:6,8:ncol(dayvars))]}
   
   # Calculate daily averages
@@ -921,24 +924,24 @@ accel.process <- function(counts, steps = NULL, days = NULL, id = NULL, brevity 
   
   # Drop variables according to brevity and weekday.weekend settings
   if (brevity==1) {
-    if (weekday.weekend==TRUE) {averages = averages[,c(1:8,69:71,132:134)]}
-    else {averages = averages[,c(1:8)]}
+    if (weekday.weekend==TRUE) {averages = averages[,c(1:8,69:71,132:134),drop=FALSE]}
+    else {averages = averages[,c(1:8),drop=FALSE]}
   } else if (brevity==2) {
     if (weekday.weekend==TRUE) {
-      if (is.null(steps)) {averages = averages[,c(1:8,10:44,69:71,73:107,132:134,136:170)]}
-      else {averages = averages[,c(1:44,69:107,132:170)]}
+      if (is.null(steps)) {averages = averages[,c(1:8,10:44,69:71,73:107,132:134,136:170),drop=FALSE]}
+      else {averages = averages[,c(1:44,69:107,132:170),drop=FALSE]}
     }
     else {
-      if (is.null(steps)) {averages = averages[,c(1:8,10:44)]}
-      else {averages = averages[,1:44]}
+      if (is.null(steps)) {averages = averages[,c(1:8,10:44),drop=FALSE]}
+      else {averages = averages[,1:44,drop=FALSE]}
     }
   } else if (brevity==3) {
     if (weekday.weekend==TRUE) {
-      if (is.null(steps)) {averages = averages[,c(1:8,10:71,73:134,136:194)]}
+      if (is.null(steps)) {averages = averages[,c(1:8,10:71,73:134,136:194),drop=FALSE]}
     }
     else {
-      if (is.null(steps)) {averages = averages[,c(1:8,10:68)]}
-      else {averages = averages[,1:68]}
+      if (is.null(steps)) {averages = averages[,c(1:8,10:68),drop=FALSE]}
+      else {averages = averages[,1:68,drop=FALSE]}
     }
   }
   

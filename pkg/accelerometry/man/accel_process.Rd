@@ -106,11 +106,12 @@ If TRUE and return.averages=TRUE, function returns vector that summarizes data a
   \item{return.form}{
 If 1, function returns physical activity variables on per-person basis, i.e. daily averages for each participant; if 2, function returns variables on per-day basis; if 3, function returns both via a list.
 }
+}
 \details{
 NA
 }
 \value{
-Either a matrix with physical activity variables for each day of data or a vector that summarizes data, i.e. number of valid days, average daily counts, etc.
+Either a matrix with physical activity variables for each day of data or a matrix that summarizes data, i.e. number of valid days, average daily counts, etc.
 }
 \references{
 1. Centers for Disease Control and Prevention (CDC). National Center for Health Statistics (NCHS). National Health and Nutrition Examination Survey Data. Hyattsville, MD: US Department of Health and Human Services, Centers for Disease Control and Prevention, 2003-6 \url{http://www.cdc.gov/nchs/nhanes/nhanes_questionnaires.htm}. Accessed February 1, 2014.
