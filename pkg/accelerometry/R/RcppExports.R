@@ -706,7 +706,7 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
   if (is.null(id)) {id = 1} else {id = id[1]}
   
   # Calculate number of full days of data
-  numdays = ceil(datalength/1440)
+  numdays = ceiling(datalength/1440)
   
   # Initialize matrix to save daily physical activity variables
   dayvars = matrix(NA,ncol=66,nrow=numdays)
@@ -1161,7 +1161,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
   if (is.null(id)) {id = 1} else {id = id[1]}
   
   # Calculate number of full days of data
-  numdays = ceil(datalength/1440)
+  numdays = ceiling(datalength/1440)
   
   # Initializing matrix to save daily physical activity variables
   dayvars = matrix(NA,ncol=122,nrow=numdays)
