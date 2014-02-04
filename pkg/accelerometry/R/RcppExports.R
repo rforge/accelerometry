@@ -1155,7 +1155,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
   }
   
   # Get number of minutes of data
-  datalength = nrow(counts)
+  datalength = nrow(counts.tri)
   
   # If id value or vector is provided, get first value
   if (is.null(id)) {id = 1} else {id = id[1]}
