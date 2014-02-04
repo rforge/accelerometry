@@ -1,5 +1,5 @@
-\name{accel.process}
-\alias{accel.process}
+\name{accel.process.uni}
+\alias{accel.process.uni}
 \title{
 Process uniaxial minute-to-minute accelerometer data
 }
@@ -7,16 +7,16 @@ Process uniaxial minute-to-minute accelerometer data
 This function calculates a variety of physical activity variables based on uniaxial minute-to-minute accelerometer data for individual participants. A data dictionary for the variables returned is available on the author's website, \url{https://sites.google.com/site/danevandomelen/}.
 }
 \usage{
-accel.process(counts, steps = NULL, days = NULL, id = NULL, brevity = 1, valid.days = 1,
-              valid.week.days = 0, valid.weekend.days = 0, 
-              int.cuts = c(100,760,2020,5999), cpm.nci = FALSE, days.distinct = FALSE, 
-              nonwear.window = 60, nonwear.tol = 0, nonwear.tol.upper = 99, 
-              nonwear.nci = FALSE, weartime.minimum = 600, weartime.maximum = 1200, 
-              use.partialdays = FALSE, active.bout.length = 10, active.bout.tol = 0, 
-              mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, active.bout.nci = FALSE,
-              sed.bout.tol = 0, sed.bout.tol.maximum = int.cuts[2]-1, 
-              artifact.thresh = 25000, artifact.action = 1, weekday.weekend = FALSE,
-              return.form = 2)
+accel.process.uni(counts, steps = NULL, days = NULL, id = NULL, brevity = 1, 
+                  valid.days = 1, valid.week.days = 0, valid.weekend.days = 0, 
+                  int.cuts = c(100,760,2020,5999), cpm.nci = FALSE, 
+                  days.distinct = FALSE, nonwear.window = 60, nonwear.tol = 0, 
+                  nonwear.tol.upper = 99, nonwear.nci = FALSE, weartime.minimum = 600, 
+                  weartime.maximum = 1200, use.partialdays = FALSE, 
+                  active.bout.length = 10, active.bout.tol = 0, mvpa.bout.tol.lower = 0, 
+                  vig.bout.tol.lower = 0, active.bout.nci = FALSE, sed.bout.tol = 0, 
+                  sed.bout.tol.maximum = int.cuts[2]-1, artifact.thresh = 25000, 
+                  artifact.action = 1, weekday.weekend = FALSE, return.form = 2)
 }
 \arguments{
   \item{counts}{
@@ -101,7 +101,7 @@ Lower cut-off for counts that are abnormally high and should be considered artif
 If 1, exclude days that have one or more artifacts; if 2, consider artifacts as non-wear time; if 3, replace artifacts with average of neighboring count values; if 4, take no action.
 }
   \item{weekday.weekend}{
-If TRUE and return.averages=TRUE, function returns vector that summarizes data across all valid days as well as all valid weekdays and all valid weekend days.
+If TRUE, function computes physical activity averages for weekdays and weekend days separately (in addition to daily averages for all valid days, which are computed regardless). If FALSE, function only computes averages for all valid days.
 }
   \item{return.form}{
 If 1, function returns physical activity variables on per-person basis, i.e. daily averages for each participant; if 2, function returns variables on per-day basis; if 3, function returns both via a list.
@@ -111,7 +111,7 @@ If 1, function returns physical activity variables on per-person basis, i.e. dai
 NA
 }
 \value{
-Either a matrix with physical activity variables for each day of data or a matrix that summarizes data, i.e. number of valid days, average daily counts, etc.
+A single matrix or a list of two matrices, depending on return.form.
 }
 \references{
 1. Centers for Disease Control and Prevention (CDC). National Center for Health Statistics (NCHS). National Health and Nutrition Examination Survey Data. Hyattsville, MD: US Department of Health and Human Services, Centers for Disease Control and Prevention, 2003-6 \url{http://www.cdc.gov/nchs/nhanes/nhanes_questionnaires.htm}. Accessed February 1, 2014.
@@ -126,7 +126,7 @@ Dane R. Van Domelen
 \note{
 Leaving days.distinct set to FALSE is strongly encouraged. If set to TRUE, activity bouts and non-wear periods that span the end of one day and the beginning of the next may be missed. This option is included because it is necessary to reproduce the algorithm used in the NCI's SAS programs [2].
 
-The default for weartime.maximum is 1200. Daily wear time greater than 1200 minutes corresponds to less than 4 hours of sleep. In such cases, it seems more likely that the participant slept while wearing the device, and as a result had small movements overnight show up as wear time. However, wear time maximums are not uncommon. Users who wish to use more traditional data processing methodology can set weartime.maximum to 1440. Also, if participants in the study were not instructed to remove the accelerometer during sleeping, weartime.maximum should be set to 1440.
+The default for weartime.maximum is 1440, but it may be better to set it to a lower value (e.g. 1200) if the participants were instructed to remove their accelerometers for sleeping. Daily wear time greater than 1200 minutes corresponds to less than 4 hours of sleep. In these cases it seems more likely that the participant slept while wearing the device, and as a result had small movements overnight show up as wear time. This could inflate estimates of sedentary time and shrink estimates of physical activity, e.g. counts per minute (CPM). 
 
 For use.partialdays, one might prefer to include days of monitoring that do not have a full 1440 minutes of data, as long as the wear time criteria are met. However, it seems likely that missing segments of data might tend to occur at a particular time of day (e.g. evening), and physical activity is strongly associated with time of day. Therefore, including such days could introduce bias.
 
@@ -137,7 +137,7 @@ If the user allows for a tolerance in bout detection (e.g. active.bout.tol = 2) 
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}.
 }
 \seealso{
-\code{\link{blockaves}}, \code{\link{accel.artifacts}}, \code{\link{accel.bouts}}, \code{\link{accel.intensities}}, \code{\link{accel.sedbreaks}}, \code{\link{accel.weartime}}, \code{\link{movingaves}}
+\code{\link{accel.artifacts}}, \code{\link{accel.bouts}}, \code{\link{accel.process.tri}}, \code{\link{accel.intensities}}, \code{\link{accel.sedbreaks}}, \code{\link{accel.weartime}}, \code{\link{blockaves}}, \code{\link{movingaves}}, \code{\link{rle2}}
 }
 \examples{
 # Load in sample data frame
@@ -149,24 +149,24 @@ days.part1 <- testdata[testdata[,"seqn"] == 21005,"paxday"]
 counts.part1 <- testdata[testdata[,"seqn"] == 21005,"paxinten"]
 
 # Process data from ID 21005 and request per-day variables
-accel.days <- accel.process(counts = counts.part1, days = days.part1, id = id.part1)
+accel.days <- accel.process.uni(counts = counts.part1, days = days.part1, id = id.part1)
 
 # Process data from ID 21005 and request daily averages
-accel.averages <- accel.process(counts = counts.part1, days = days.part1, 
-                                id = id.part1, return.form = 1)
+accel.averages <- accel.process.uni(counts = counts.part1, days = days.part1, 
+                                    id = id.part1, return.form = 1)
 
 # Process data from ID 21005 and request per-day variables and daily averages
-accel.list <- accel.process(counts = counts.part1, days = days.part1, 
-                            id = id.part1, return.form = 3)
+accel.list <- accel.process.uni(counts = counts.part1, days = days.part1, 
+                                id = id.part1, return.form = 3)
                   
 # Process data according to methods used in NCI's SAS programs [2]
-accel.nci <- accel.process(counts = counts.part1, days = days.part1, id = id.part1,
-                           brevity = 2, valid.days = 4, cpm.nci = TRUE, 
-                           days.distinct = TRUE, nonwear.tol = 2, 
-                           nonwear.tol.upper = 100, nonwear.nci = TRUE, 
-                           weartime.maximum = 1440, active.bout.tol = 2, 
-                           active.bout.nci = TRUE, artifact.thresh = 32767, 
-                           artifact.action = 3, return.form = 3)
+accel.nci <- accel.process.uni(counts = counts.part1, days = days.part1, id = id.part1,
+                               brevity = 2, valid.days = 4, cpm.nci = TRUE, 
+                               days.distinct = TRUE, nonwear.tol = 2, 
+                               nonwear.tol.upper = 100, nonwear.nci = TRUE, 
+                               weartime.maximum = 1440, active.bout.tol = 2, 
+                               active.bout.nci = TRUE, artifact.thresh = 32767, 
+                               artifact.action = 3, return.form = 3)
 }
 \keyword{ accelerometry }
 \keyword{ physical activity }
