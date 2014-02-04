@@ -1,6 +1,6 @@
 Package: accelerometry
 Type: Package
-Title: Functions for processing uniaxial minute-to-minute accelerometer data
+Title: Functions for processing minute-to-minute accelerometer data
 Version: 2.1
 Date: 2014-02-01
 Author: Dane R. Van Domelen

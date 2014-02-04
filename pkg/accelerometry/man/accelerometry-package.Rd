@@ -3,7 +3,7 @@
 \alias{accelerometry}
 \docType{package}
 \title{
-Functions for processing uniaxial minute-to-minute accelerometer data
+Functions for processing minute-to-minute accelerometer data
 }
 \description{
 This package contains a collection of functions that perform operations on time-series accelerometer data, such as identify non-wear time, flag minutes that are part of an activity bout, and find the maximum 10-minute average count value. The functions are generally very flexible, allowing for a variety of algorithms to be implemented. Most of the functions are written in C++ and therefore execute very quickly.
@@ -20,7 +20,8 @@ The following functions are contained in the package accelerometry:
 
 \code{\link{accel.artifacts}},
 \code{\link{accel.bouts}},
-\code{\link{accel.process}},
+\code{\link{accel.process.uni}},
+\code{\link{accel.process.tri}},
 \code{\link{accel.intensities}},
 \code{\link{accel.sedbreaks}},
 \code{\link{accel.weartime}},
@@ -47,7 +48,7 @@ Acknowledgment: This material is based upon work supported by the National Scien
 NA
 }
 \examples{
-# Load in sample data frame
+# Load in sample data from NHANES 2003-2004 [1]
 data(testdata)
 
 # Get data from ID number 21005
@@ -66,22 +67,22 @@ mvpa.bouts.flag <- accel.bouts(counts = counts.part1, weartime = weartime.flag,
 max.10min.movingave <- movingaves(x=counts.part1,window=10,return.max=TRUE)
 
 # Process data from ID 21005 and request per-day variables
-accel.days <- accel.process(counts = counts.part1, days = days.part1, id = id.part1)
+accel.days <- accel.process.uni(counts = counts.part1, days = days.part1, id = id.part1)
 
 # Process data from ID 21005 and request daily averages
-accel.averages <- accel.process(counts = counts.part1, days = days.part1, 
-                                id = id.part1, return.form = 1)
+accel.averages <- accel.process.uni(counts = counts.part1, days = days.part1, 
+                                    id = id.part1, return.form = 1)
 
 # Process data from ID 21005 and request per-day variables and daily averages
-accel.list <- accel.process(counts = counts.part1, days = days.part1, 
-                            id = id.part1, return.form = 3)
-
+accel.list <- accel.process.uni(counts = counts.part1, days = days.part1, 
+                                id = id.part1, return.form = 3)
+                  
 # Process data according to methods used in NCI's SAS programs [2]
-accel.nci <- accel.process(counts = counts.part1, days = days.part1, id = id.part1,
-                           brevity = 2, valid.days = 4, cpm.nci = TRUE, 
-                           days.distinct = TRUE, nonwear.tol = 2, 
-                           nonwear.tol.upper = 100, nonwear.nci = TRUE, 
-                           weartime.maximum = 1440, active.bout.tol = 2, 
-                           active.bout.nci = TRUE, artifact.thresh = 32767, 
-                           artifact.action = 3, return.form = 3)
+accel.nci <- accel.process.uni(counts = counts.part1, days = days.part1, id = id.part1,
+                               brevity = 2, valid.days = 4, cpm.nci = TRUE, 
+                               days.distinct = TRUE, nonwear.tol = 2, 
+                               nonwear.tol.upper = 100, nonwear.nci = TRUE, 
+                               weartime.maximum = 1440, active.bout.tol = 2, 
+                               active.bout.nci = TRUE, artifact.thresh = 32767, 
+                               artifact.action = 3, return.form = 3)
 }

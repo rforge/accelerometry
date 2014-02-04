@@ -4,7 +4,7 @@
 Activity bout detection
 }
 \description{
-This function identifies bouts of physical activity in uniaxial minute-to-minute accelerometer data.
+This function identifies bouts of physical activity in minute-to-minute accelerometer data.
 }
 \usage{
 accel.bouts(counts, weartime = NULL, bout.length = 10, thresh.lower = 0, 
@@ -72,7 +72,7 @@ Leaving days.distinct set to FALSE is strongly encouraged. If set to TRUE, activ
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}
 }
 \seealso{
-\code{\link{accel.weartime}}, \code{\link{accel.process}}
+\code{\link{accel.weartime}}, \code{\link{accel.process.uni}}, \code{\link{accel.process.tri}}
 }
 \examples{
 # Load in sample data frame

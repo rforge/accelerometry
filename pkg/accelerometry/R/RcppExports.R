@@ -522,15 +522,15 @@ rle2 <- function(x) {
   
 }
 
-accel.process <- function(counts, steps = NULL, days = NULL, id = NULL, brevity = 1, valid.days = 1,
-                         valid.week.days = 0, valid.weekend.days = 0, int.cuts = c(100,760,2020,5999),
-                         cpm.nci = FALSE, days.distinct = FALSE, nonwear.window = 60, nonwear.tol = 0, 
-                         nonwear.tol.upper = 99, nonwear.nci = FALSE, weartime.minimum = 600, 
-                         weartime.maximum = 1200, use.partialdays = FALSE, active.bout.length = 10, 
-                         active.bout.tol = 0, mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0,
-                         active.bout.nci = FALSE, sed.bout.tol = 0, sed.bout.tol.maximum = int.cuts[2]-1,
-                         artifact.thresh = 25000, artifact.action = 1, weekday.weekend = FALSE, 
-                         return.form = 2) {
+accel.process.uni <- function(counts, steps = NULL, days = NULL, id = NULL, brevity = 1, valid.days = 1,
+                              valid.week.days = 0, valid.weekend.days = 0, int.cuts = c(100,760,2020,5999),
+                              cpm.nci = FALSE, days.distinct = FALSE, nonwear.window = 60, nonwear.tol = 0, 
+                              nonwear.tol.upper = 99, nonwear.nci = FALSE, weartime.minimum = 600, 
+                              weartime.maximum = 1440, use.partialdays = FALSE, active.bout.length = 10, 
+                              active.bout.tol = 0, mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0,
+                              active.bout.nci = FALSE, sed.bout.tol = 0, sed.bout.tol.maximum = int.cuts[2]-1,
+                              artifact.thresh = 25000, artifact.action = 1, weekday.weekend = FALSE, 
+                              return.form = 2) {
     
   # If counts is a character, output error
   if (is.character(counts)) {
@@ -556,13 +556,6 @@ accel.process <- function(counts, steps = NULL, days = NULL, id = NULL, brevity 
   # If length of counts is less than 1440, output error
   if (length(counts)<1440) {
     stop("For counts= option, please ensure there is at least 1 full day of data (1440 data points)")
-  }
-  
-  # If steps is a matrix or data frame and has multiple columns, output error
-  if (is.matrix(steps) | is.data.frame(steps)) {
-    if (ncol(steps)>1) {
-      stop("For steps= option, please either enter vector or single-column matrix or data frame (or omit)")
-    }
   }
   
   # If steps is a data frame or matrix, convert to vector
@@ -806,7 +799,7 @@ accel.process <- function(counts, steps = NULL, days = NULL, id = NULL, brevity 
     }
     if (!is.null(steps)) {day.steps = steps[mat[i,2]:mat[i,3]]}
     
-    # Calculating constants that are used more than once
+    # Calculate constants that are used more than once
     daywear = sum(day.wearflag)
     maxcount = max(day.counts)
     daylength = length(day.counts)
@@ -821,7 +814,9 @@ accel.process <- function(counts, steps = NULL, days = NULL, id = NULL, brevity 
     if (daywear<weartime.minimum | daywear>weartime.maximum | (artifact.action==1 & maxcount>=artifact.thresh) |
           (use.partialdays==FALSE & daylength<1440)) {
       dayvars[k,3] = 0
-    } else {dayvars[k,3] = 1}
+    } else {
+      dayvars[k,3] = 1
+    }
     
     # Minutes of valid wear time
     dayvars[k,4] = daywear
@@ -835,10 +830,12 @@ accel.process <- function(counts, steps = NULL, days = NULL, id = NULL, brevity 
     # Counts per minute - calculated as total counts during wear time divided by wear time
     dayvars[k,6] = dayvars[k,5]/dayvars[k,4]
     
+    # Steps
+    if (!is.null(steps)) {
+      dayvars[k,7] = sum(day.steps[day.wearflag==1])
+    }
+    
     if (brevity==2 | brevity==3) {
-      
-      # Steps
-      if (!is.null(steps)) {dayvars[k,7] = sum(day.steps[day.wearflag==1])}
       
       # Minutes in various intensity levels
       intensities = accel.intensities(counts=day.counts.valid,thresh=int.cuts)
@@ -895,60 +892,597 @@ accel.process <- function(counts, steps = NULL, days = NULL, id = NULL, brevity 
   
   # Drop variables according to brevity setting
   if (brevity==1) {
-    dayvars = dayvars[,1:6]
+    dayvars = dayvars[,1:7]
   } else if (brevity==2) {
     dayvars = dayvars[,1:42]
   }
-  if (brevity>1 & is.null(steps)) {dayvars = dayvars[,c(1:6,8:ncol(dayvars))]}
+  
+  # Drop steps if NULL
+  if (is.null(steps)) {
+    dayvars = dayvars[,-7,drop=FALSE]
+  }
+
+  # Calculate daily averages
+  locs.valid = which(dayvars[,3]==1)
+  locs.valid.wk = which(dayvars[,3]==1 & dayvars[,2] %in% 2:6)
+  locs.valid.we = which(dayvars[,3]==1 & dayvars[,2] %in% c(1,7))
+  
+  # If weekday.weekend is FALSE, just calculate overall averages
+  if (weekday.weekend==FALSE) {
+    averages = c(id=id,valid_days=length(locs.valid),include=0,colMeans(x=dayvars[locs.valid,4:ncol(dayvars)]))
+    if (length(locs.valid)>=valid.days & length(locs.valid.wk)>=valid.week.days & length(locs.valid.we)>=valid.weekend.days) {
+      averages[3] = 1
+    }
+  } else {
+    
+    # Otherwise calculate averages by all valid days and by valid weekdays and valid weekend days
+    averages = c(id=id,valid_days=length(locs.valid),valid_week_days=length(locs.valid.wk),
+                 valid_weekend_days=length(locs.valid.we), include=0,
+                 colMeans(x=dayvars[locs.valid,4:ncol(dayvars)]),
+                 colMeans(x=dayvars[locs.valid.wk,4:ncol(dayvars)]),
+                 colMeans(x=dayvars[locs.valid.we,4:ncol(dayvars)]))
+    if (length(locs.valid)>=valid.days & length(locs.valid.wk)>=valid.week.days & length(locs.valid.we)>=valid.weekend.days) {
+      averages[5] = 1
+    }
+    
+    # Modify variable names for weekdays and weekends
+    numvars = (length(averages)-5)/3
+    names(averages)[(6+numvars):(6+2*numvars-1)] = paste("wk_",names(averages)[(6+numvars):(6+2*numvars-1)],sep="")
+    names(averages)[(6+2*numvars):(6+3*numvars-1)] = paste("we_",names(averages)[(6+2*numvars):(6+3*numvars-1)],sep="")
+    
+  }
+  
+  # If cpm.nci is TRUE, re-calculate averages for cpm variables
+  if (cpm.nci==TRUE) {
+    averages["cpm"] = averages["counts"]/averages["valid_min"]
+  }
+  
+  # Convert averages to matrix for the hell of it
+  averages = matrix(averages,nrow=1,dimnames=list(NULL,names(averages)))
+  
+  
+  # Return data frame(s)
+  if (return.form==1) {
+    return(averages)
+  } else if (return.form==2) {
+    return (dayvars)
+  } else if (return.form==3) {
+    retlist = list(averages=averages, dayvars=dayvars)
+    return(retlist)
+  }
+}
+
+
+accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, brevity = 1, valid.days = 1, 
+                              valid.week.days = 0, valid.weekend.days = 0, int.axis = "vert",
+                              int.cuts = c(100,760,2020,5999), cpm.nci = FALSE, hourly.axis = "vert",
+                              days.distinct = FALSE, nonwear.axis = "vert", nonwear.window = 60, nonwear.tol = 0, 
+                              nonwear.tol.upper = 99, nonwear.nci = FALSE, weartime.minimum = 600, 
+                              weartime.maximum = 1440, use.partialdays = FALSE, active.bout.length = 10, 
+                              active.bout.tol = 0, mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, 
+                              active.bout.nci = FALSE, sed.bout.tol = 0, sed.bout.tol.maximum = int.cuts[2]-1, 
+                              artifact.axis = "vert", artifact.thresh = 25000, artifact.action = 1, 
+                              weekday.weekend = FALSE, return.form = 2) {
+  
+  # If counts variable is a character, output error
+  if (is.character(counts.tri)) {
+    stop("For counts.tri= option, please enter three-column matrix or data frame with vertical, 
+         anteroposterior (AP), and mediolateral (ML) counts in that order")
+  }
+  
+  # If counts variable is a data frame, convert to matrix
+  if (is.data.frame(counts.tri)) {
+    counts.tri = as.matrix(counts.tri)
+  }
+  
+  # If any count values are less than 0, output error
+  if (sum(counts.tri<0)>0) {
+    stop("For counts.tri= option, please ensure that all count values are non-negative")
+  }
+  
+  # If length of counts.tri is less than 1440, output error
+  if (nrow(counts.tri)<1440) {
+    stop("For counts.tri= option, please ensure there is at least 1 full day of data (1440 minutes)")
+  }
+  
+  # If steps is a data frame or matrix, convert to vector
+  if (is.data.frame(steps)) {steps = as.vector(as.matrix(steps))}
+  if (is.matrix(steps)) {steps = as.vector(steps)}
+  
+  # If any step values are less than 0, output error
+  if (sum(steps<0)>0) {
+    stop("For steps= option, please ensure that all values of object are non-negative")
+  }
+  
+  # If length of steps and counts.tri vectors are different, output error
+  if (!is.null(steps) & length(steps)!=nrow(counts.tri)) {
+    stop("For counts.tri= and steps= options, please enter objects of same length")
+  }
+  
+  # If more than one id, output error
+  if (!is.null(id) & length(unique(id))>1) {
+    stop("For id= option, please enter either a single ID number or a vector with repeated value of a single ID number")
+  }
+  
+  # If brevity out of range, output error
+  if (sum(brevity==c(1,2,3))==0) {
+    stop("For brevity= option, please enter 1, 2, or 3 (see documentation)")
+  }
+  
+  # If valid.days, valid.week.days, or valid.weekend.days out of range, output error
+  if (valid.days<1 | valid.days>7 | valid.week.days>5 | valid.weekend.days > 2) {
+    stop("For valid.days= option, please enter value between 1 and 7; for valid.week.days= 
+         and valid.weekend.days= options, please enter values no greater than 5 and 2, 
+         respectively")
+  }
+  
+  # If int.axis is out of range, output error
+  if (!int.axis %in% c("vert","ap","ml","sum","mag")) {
+    stop("For int.axis= option, please enter one of the following: vert, ap, ml, sum, mag")
+  }
+  
+  # If length of int.cuts is not 4, or if values are out of range, output error
+  if (length(int.cuts)!=4 | sum(int.cuts<0)>0) {
+    stop("For int.cuts= option, please enter a vector of 4 non-negative values")
+  }
+  
+  # If cpm.nci is not a logical, output error
+  if (!is.logical(cpm.nci)) {
+    stop("For cpm.nci= option, please enter TRUE or FALSE")
+  }
+  
+  # If hourly.axis is out of range, output error
+  if (!hourly.axis %in% c("vert","ap","ml","sum","mag")) {
+    stop("For hourly.axis= option, please enter one of the following: vert, ap, ml, sum, mag")
+  }
+  
+  # If days.distinct is not a logical, output error
+  if (!is.logical(days.distinct)) {
+    stop("For days.distinct= option, please enter TRUE or FALSE")
+  }
+  
+  # If nonwear.axis is out of range, output error
+  if (!nonwear.axis %in% c("vert","ap","ml","sum","mag")) {
+    stop("For nonwear.axis= option, please enter one of the following: vert, ap, ml, sum, mag")
+  }
+  
+  # If If nonwear.window is out of range, output error
+  if (nonwear.window<1) {
+    stop("For nonwear.window= option, please enter positive value")
+  }
+  
+  # If nonwear.tol out of range, output error
+  if (nonwear.tol<0 | nonwear.tol>=nonwear.window) {
+    stop("For nonwear.tol= option, please enter non-negative value less than nonwear.window")
+  }
+  
+  # If nonwear.tol.upper out of range, output error
+  if (nonwear.tol.upper<0) {
+    stop("For nonwear.tol.upper= option, please enter non-negative value")
+  }
+  
+  # If nonwear.nci is not a logical, output error
+  if (!is.logical(nonwear.nci)) {
+    stop("For nonwear.nci= option, please enter TRUE or FALSE")
+  }
+  
+  # If weartime.minimum out of range, output error
+  if (weartime.minimum <=0) {
+    stop("For weartime.minimum= option, please enter positive value")
+  }
+  
+  # If weartime.maximum out of range, output error
+  if (weartime.maximum<=weartime.minimum) {
+    stop("For weartime.maximum= option, please enter positive value greater than weartime.minimum")
+  }
+  
+  # If use.partialdays is not a logical, output error
+  if (!is.logical(use.partialdays)) {
+    stop("For use.partialdays= option, please enter TRUE or FALSE")
+  }
+  
+  # If active.bout.length out of range, output error
+  if (active.bout.length<=1) {
+    stop("For active.bout.length= option, please enter value greater than 1")
+  }
+  
+  # If active.bout.tol out of range, output error
+  if (active.bout.tol<0 | active.bout.tol>=active.bout.length) {
+    stop("For active.bout.tol= option, please enter non-negative value less than active.bout.tol")
+  }
+  
+  # If mvpa.bout.tol.lower out of range, output error
+  if (mvpa.bout.tol.lower<0 | mvpa.bout.tol.lower>int.cuts[3]) {
+    stop("For mvpa.bout.tol.lower= option, please enter non-negative value no greater than int.cuts[3]")
+  }
+  
+  # If vig.bout.tol.lower out of range, output error
+  if (vig.bout.tol.lower<0 | vig.bout.tol.lower>int.cuts[4]) {
+    stop("For vig.bout.tol.lower= option, please enter non-negative value no greater than int.cuts[4]")
+  }
+  
+  # If active.bout.nci is not a logical, output error
+  if (!is.logical(active.bout.nci)) {
+    stop("For active.bout.nci= option, please enter TRUE or FALSE")
+  }
+  
+  # If sed.bout.tol out of range, output error
+  if (sed.bout.tol<0 | sed.bout.tol>=10) {
+    stop("For sed.bout.tol= option, please enter non-negative value less than 10")
+  }
+  
+  # If sed.bout.tol.maximum out of range, output error
+  if (sed.bout.tol.maximum<0) {
+    stop("For sed.tol.maximum= option, please enter non-negative value")
+  }
+  
+  # If artifact.thresh out of range, output error
+  if (artifact.thresh <= int.cuts[4]) {
+    stop("For artifact.thresh= option, please ensure that value is greater than int.cuts[4]")
+  }
+  
+  # If artifact.action out of range, output error
+  if (sum(artifact.action==c(1,2,3,4))==0) {
+    stop("For artifact.action= option, please enter 1, 2, 3, or 4 (see documentation)")
+  }
+  
+  # If weekday.weekend is not a logical, output error
+  if (!is.logical(weekday.weekend)) {
+    stop("For weekday.weekend= option, please enter TRUE or FALSE")
+  }
+  
+  # If return.form is out of range, output error
+  if (!return.form %in% c(1,2,3)) {
+    stop("For return.form= option, please enter 1 for per-person, 2 for per-day, or 3 for both")
+  }
+  
+  # Get number of minutes of data
+  datalength = nrow(counts.tri)
+  
+  # If days vector not provided, assign day 1 = 1-1440, day 2 = 1441-2880, etc.
+  if (is.null(days)) {
+    days = rep(NA,datalength)
+    for (j in 1:ceiling(datalength/1440)) {
+      days[(1440*j-1439):min(1440*j,datalength)] = ceiling(j%%7.1)
+    }
+  }
+  
+  # If id value or vector is provided, get first value
+  if (is.null(id)) {id = 1} else {id = id[1]}
+  
+  # Finding start and end points of each day
+  mat = rle2(x=days)
+  
+  # Initializing matrix to save daily physical activity variables
+  dayvars = matrix(NA,ncol=122,nrow=nrow(mat))
+  
+  # k is the "day counter"
+  k = 0
+  
+  # Calculate triaxial sum and vector magnitude and add to counts.tri
+  counts.tri = cbind(counts.tri,.rowSums(X=counts.tri,m=datalength,n=3),
+                     apply(X=counts.tri, MARGIN=1, FUN = function(x) {sqrt(x[1]^2+x[2]^2+x[3]^2)}))
+  
+  # Add column names to counts matrix
+  colnames(counts.tri) = c("vert","ap","ml","sum","mag")
+  
+  # Put vertical axis counts in its own vector for efficiency
+  counts.vert = counts.tri[,1]
+  
+  # Determine which column of counts.tri should be used for artifacts
+  if (artifact.axis=="vert" ) {
+    artifactvec = counts.vert
+  } else {
+    artifactvec = counts.tri[,artifact.axis]
+  }
+  
+  # Find locations of artifacts
+  if (max(artifactvec)>=artifact.thresh) {
+    artifact.locs = which(artifactvec>=artifact.thresh)
+  } else {
+    artifact.locs = NULL
+  }
+  
+  # If artifact.action = 3, replace minutes with counts > artifact.thresh with average of surrounding minutes
+  if (artifact.action==3 & !is.null(artifact.locs)) {
+    counts.tri[artifact.locs,1:5] = artifact.thresh
+    counts.tri[,1] = accel.artifacts(counts = counts.tri[,1], thresh = artifact.thresh)
+    counts.tri[,2] = accel.artifacts(counts = counts.tri[,2], thresh = artifact.thresh)
+    counts.tri[,3] = accel.artifacts(counts = counts.tri[,3], thresh = artifact.thresh)
+    counts.tri[,4] = accel.artifacts(counts = counts.tri[,4], thresh = artifact.thresh)
+    counts.tri[,5] = accel.artifacts(counts = counts.tri[,5], thresh = artifact.thresh)
+  }
+  
+  # Determine which column of counts.tri should be used for non-wear detection
+  if (nonwear.axis=="vert" ) {
+    nonwearvec = counts.vert
+  } else {
+    nonwearvec = counts.tri[,nonwear.axis]
+  }
+  
+  # Apply non-wear algorithm
+  wearflag = accel.weartime(counts=nonwearvec,
+                            window=nonwear.window,
+                            tol=nonwear.tol,
+                            tol.upper=nonwear.tol.upper,
+                            nci=nonwear.nci,
+                            days.distinct=days.distinct)
+  
+  # If artifact.action = 2, consider minutes with counts >= artifact.thresh as non-weartime
+  if (artifact.action==2 & !is.null(artifact.locs)) {
+    wearflag[artifact.locs] = 0
+    counts.tri[artifact.locs,] = 0
+  }
+  
+  # Determine which column of counts.tri should be used for intensities and activity bouts
+  if (int.axis=="vert" ) {
+    intvec = counts.vert
+  } else {
+    intvec = counts.tri[,int.axis]
+  }
+  
+  # Identify bouts of MVPA, VPA, and sedentary time
+  if (brevity==2 | brevity==3) {
+    boutedMVPA = accel.bouts(counts=intvec,
+                             weartime=wearflag,
+                             bout.length=active.bout.length,
+                             thresh.lower=int.cuts[3],
+                             tol=active.bout.tol,
+                             tol.lower=mvpa.bout.tol.lower,
+                             nci=active.bout.nci,
+                             days.distinct=days.distinct,
+                             skipchecks=TRUE)
+    boutedvig = accel.bouts(counts=intvec,
+                            weartime=wearflag,
+                            bout.length=active.bout.length,
+                            thresh.lower=int.cuts[4],
+                            tol=active.bout.tol,
+                            tol.lower=vig.bout.tol.lower,
+                            nci=active.bout.nci,
+                            days.distinct=days.distinct,
+                            skipchecks=TRUE)
+    boutedsed10 = accel.bouts(counts=intvec,
+                              weartime=wearflag,
+                              bout.length=10,
+                              thresh.upper=int.cuts[1]-1,
+                              tol=sed.bout.tol,
+                              tol.upper=sed.bout.tol.maximum,
+                              days.distinct=days.distinct,
+                              skipchecks=TRUE)
+    boutedsed30 = accel.bouts(counts=intvec,
+                              weartime=wearflag,
+                              bout.length=30,
+                              thresh.upper=int.cuts[1]-1,
+                              tol=sed.bout.tol,
+                              tol.upper=sed.bout.tol.maximum,
+                              days.distinct=days.distinct,
+                              skipchecks=TRUE)
+    boutedsed60 = accel.bouts(counts=intvec,
+                              weartime=wearflag,
+                              bout.length=60,
+                              thresh.upper=int.cuts[1]-1,
+                              tol=sed.bout.tol,
+                              tol.upper=sed.bout.tol.maximum,
+                              days.distinct=days.distinct,
+                              skipchecks=TRUE)
+  }
+  
+  # Looping through accelerometer data for i days
+  for (i in 1:nrow(mat)) { 
+    
+    # Row index for physical activity variable matrix
+    k = k + 1
+    
+    # Loading accelerometer data from day i
+    day.counts = counts.tri[mat[i,2]:mat[i,3],]
+    day.wearflag = wearflag[mat[i,2]:mat[i,3]]
+    if (brevity==2 | brevity==3) {
+      day.boutedMVPA = boutedMVPA[mat[i,2]:mat[i,3]]
+      day.boutedvig = boutedvig[mat[i,2]:mat[i,3]]
+      day.boutedsed10 = boutedsed10[mat[i,2]:mat[i,3]]
+      day.boutedsed30 = boutedsed30[mat[i,2]:mat[i,3]]
+      day.boutedsed60 = boutedsed60[mat[i,2]:mat[i,3]]
+    }
+    if (!is.null(steps)) {day.steps = steps[mat[i,2]:mat[i,3]]}
+    
+    # Calculate constants that are used more than once
+    daywear = sum(day.wearflag)
+    maxcounts = apply(X=day.counts, MARGIN=2, FUN = max)
+    daylength = nrow(day.counts)
+    
+    # ID number
+    dayvars[k,1] = id
+    
+    # Day of week
+    dayvars[k,2] = mat[i,1]
+    
+    # Check whether day is valid for analysis; if not, mark as invalid
+    if (daywear<weartime.minimum | daywear>weartime.maximum | (artifact.action==1 & maxcounts[artifact.axis]>=artifact.thresh) |
+          (use.partialdays==FALSE & daylength<1440)) {
+      dayvars[k,3] = 0
+    } else {
+      dayvars[k,3] = 1
+    }
+    
+    # Minutes of valid wear time
+    dayvars[k,4] = daywear
+    
+    # Store each axis of counts in its own vector
+    day.counts.vert = day.counts[,1]
+    day.counts.ap = day.counts[,2]
+    day.counts.ml = day.counts[,3]
+    day.counts.sum = day.counts[,4]
+    day.counts.mag = day.counts[,5]
+    day.counts.int = day.counts[,int.axis]
+    
+    # Store day.counts[day.wearflag==1] into its own matrix
+    day.counts.valid = day.counts[day.wearflag==1,]
+    
+    # Total counts during wear time in each axis
+    dayvars[k,5:9] = .colSums(X=day.counts.valid, m=daywear, n=5)
+    
+    # Counts per minute
+    dayvars[k,10:14] = dayvars[k,5:9]/dayvars[k,4]
+    
+    # Steps
+    if (!is.null(steps)) {
+      dayvars[k,15] = sum(day.steps[day.wearflag==1])
+    }
+    
+    if (brevity==2 | brevity==3) {
+      
+      # Store day.counts.valid[,int.axis] into its own vector
+      day.counts.valid.int = day.counts.valid[,int.axis]
+      
+      # Flag valid minutes by intensity level
+      intensity = cut(x=day.counts.valid.int,breaks=c(0,int.cuts,Inf),right=FALSE,labels=1:5)
+      
+      # Minutes in various intensity levels
+      dayvars[k,16:20] = table(intensity)
+      dayvars[k,21] = dayvars[k,17]+dayvars[k,18]
+      dayvars[k,22] = dayvars[k,19]+dayvars[k,20]
+      dayvars[k,23] = daywear-dayvars[k,16]
+      
+      # Proportions of daily wear time in each intensity level
+      dayvars[k,24:31] = dayvars[k,16:23]/daywear
+      dayvars[k,32:36] = apply(X=day.counts.valid[intensity==1,],MARGIN=2,FUN=sum)
+      dayvars[k,37:41] = apply(X=day.counts.valid[intensity==2,],MARGIN=2,FUN=sum)
+      dayvars[k,42:46] = apply(X=day.counts.valid[intensity==3,],MARGIN=2,FUN=sum)
+      dayvars[k,47:51] = apply(X=day.counts.valid[intensity==4,],MARGIN=2,FUN=sum)
+      dayvars[k,52:56] = apply(X=day.counts.valid[intensity==5,],MARGIN=2,FUN=sum)
+      dayvars[k,57:61] = apply(X=day.counts.valid[intensity %in% c(2,3),],MARGIN=2,FUN=sum)
+      dayvars[k,62:66] = apply(X=day.counts.valid[intensity %in% c(4,5),],MARGIN=2,FUN=sum)
+      dayvars[k,67:71] = apply(X=day.counts.valid[intensity %in% c(2,3,4,5),],MARGIN=2,FUN=sum)
+      
+      # Bouted sedentary time
+      dayvars[k,72] = sum(day.boutedsed10)
+      dayvars[k,73] = sum(day.boutedsed30)
+      dayvars[k,74] = sum(day.boutedsed60)
+      
+      # Sedentary breaks
+      dayvars[k,75] = accel.sedbreaks(counts=day.counts.int,weartime=day.wearflag,thresh=int.cuts[1],skipchecks=TRUE)
+      
+      # Maximum 1-min, 5-min, 10-min, and 30-min count averages
+      dayvars[k,76:80] = maxcounts
+      dayvars[k,81] = movingaves(x=day.counts.vert,window=5,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,82] = movingaves(x=day.counts.ap,window=5,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,83] = movingaves(x=day.counts.ml,window=5,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,84] = movingaves(x=day.counts.sum,window=5,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,85] = movingaves(x=day.counts.mag,window=5,return.max=TRUE,skipchecks=TRUE)
+      
+      dayvars[k,86] = movingaves(x=day.counts.vert,window=10,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,87] = movingaves(x=day.counts.ap,window=10,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,88] = movingaves(x=day.counts.ml,window=10,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,89] = movingaves(x=day.counts.sum,window=10,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,90] = movingaves(x=day.counts.mag,window=10,return.max=TRUE,skipchecks=TRUE)
+      
+      dayvars[k,91] = movingaves(x=day.counts.vert,window=30,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,92] = movingaves(x=day.counts.ap,window=30,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,93] = movingaves(x=day.counts.ml,window=30,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,94] = movingaves(x=day.counts.sum,window=30,return.max=TRUE,skipchecks=TRUE)
+      dayvars[k,95] = movingaves(x=day.counts.mag,window=30,return.max=TRUE,skipchecks=TRUE)
+      
+      # MVPA and vigorous physical activity in >= 10-min bouts
+      dayvars[k,96] = sum(day.boutedMVPA)
+      dayvars[k,97] = sum(day.boutedvig)
+      dayvars[k,98] = sum(dayvars[k,64:65])
+      
+      if (brevity==3) {
+        
+        # Hourly counts/min averages
+        if (daylength==1440) {
+          if (hourly.axis=="vert") {
+            dayvars[k,99:122] = blockaves(x=day.counts,window=60,skipchecks=TRUE)
+          } else {
+            dayvars[k,99:122] = blockaves(x=day.counts[,hourly.axis],window=60,skipchecks=TRUE)
+          }
+        }
+        
+      }
+    }
+    
+  }
+  
+  # Format matrix of daily physical activity variables
+  colnames(dayvars) = c("id","day","valid_day","valid_min","counts_vert","counts_ap","counts_ml",
+                        "counts_sum","counts_mag","cpm_vert","cpm_ap","cpm_ml","cpm_sum","cpm_mag",
+                        "steps","sed_min","light_min","life_min","mod_min","vig_min","lightlife_min",
+                        "mvpa_min","active_min","sed_percent","light_percent","life_percent",
+                        "mod_percent","vig_percent","lightlife_percent","mvpa_percent","active_percent",
+                        "sed_counts_vert","sed_counts_ap","sed_counts_ml","sed_counts_sum",
+                        "sed_counts_mag","light_counts_vert","light_counts_ap","light_counts_ml",
+                        "light_counts_sum","light_counts_mag","life_counts_vert","life_counts_ap",
+                        "life_counts_ml","life_counts_sum","life_counts_mag","mod_counts_vert",
+                        "mod_counts_ap","mod_counts_ml","mod_counts_sum","mod_counts_mag",
+                        "vig_counts_vert","vig_counts_ap","vig_counts_ml","vig_counts_sum",
+                        "vig_counts_mag","lightlife_counts_vert","lightlife_counts_ap","lightlife_counts_ml",
+                        "lightlife_counts_sum","lightlife_counts_mag","mvpa_counts_vert",
+                        "mvpa_counts_ap","mvpa_counts_ml","mvpa_counts_sum","mvpa_counts_mag",
+                        "active_counts_vert","active_counts_ap","active_counts_ml","active_counts_sum",
+                        "active_counts_mag","sed_bouted_10min","sed_bouted_30min","sed_bouted_60min",
+                        "sed_breaks","max_1min_vert","max_1min_ap","max_1min_ml","max_1min_sum",
+                        "max_1min_mag","max_5min_vert","max_5min_ap","max_5min_ml","max_5min_sum",
+                        "max_5min_mag","max_10min_vert","max_10min_ap","max_10min_ml","max_10min_sum",
+                        "max_10min_mag","max_30min_vert","max_30min_ap","max_30min_ml",
+                        "max_30min_sum","max_30min_mag","mvpa_bouted","vig_bouted","guideline_min",
+                        "cpm_hour1","cpm_hour2","cpm_hour3","cpm_hour4","cpm_hour5","cpm_hour6",
+                        "cpm_hour7","cpm_hour8","cpm_hour9","cpm_hour10","cpm_hour11","cpm_hour12",
+                        "cpm_hour13","cpm_hour14","cpm_hour15","cpm_hour16","cpm_hour17","cpm_hour18",
+                        "cpm_hour19","cpm_hour20","cpm_hour21","cpm_hour22","cpm_hour23","cpm_hour24")
+  
+  # Drop variables according to brevity setting
+  if (brevity==1) {
+    dayvars = dayvars[,1:15,drop=FALSE]
+  } else if (brevity==2) {
+    dayvars = dayvars[,1:98,drop=FALSE]
+  }
+  
+  # Drop steps if NULL
+  if (is.null(steps)) {
+    dayvars = dayvars[,-15,drop=FALSE]
+  }
   
   # Calculate daily averages
-  averages = personvars(dayvars=dayvars,rows=1,days=valid.days,wk=valid.week.days,we=valid.weekend.days)
+  locs.valid = which(dayvars[,3]==1)
+  locs.valid.wk = which(dayvars[,3]==1 & dayvars[,2] %in% 2:6)
+  locs.valid.we = which(dayvars[,3]==1 & dayvars[,2] %in% c(1,7))
   
-  # Assign variable names
-  varnames = c("id","valid_days","valid_week_days","valid_weekend_days","include",
-               "valid_min","counts","cpm","steps","sed_min","light_min",
-               "life_min","mod_min","vig_min","lightlife_min","mvpa_min",
-               "active_min","sed_percent","light_percent","life_percent",
-               "mod_percent","vig_percent","lightlife_percent","mvpa_percent",
-               "active_percent","sed_counts","light_counts","life_counts",
-               "mod_counts","vig_counts","lightlife_counts","mvpa_counts",
-               "active_counts","sed_bouted_10min","sed_bouted_30min",
-               "sed_bouted_60min","sed_breaks","max_1min_counts","max_5min_counts",
-               "max_10min_counts","max_30min_counts","mvpa_bouted","vig_bouted",
-               "guideline_min","cpm_hour1","cpm_hour2","cpm_hour3","cpm_hour4",
-               "cpm_hour5","cpm_hour6","cpm_hour7","cpm_hour8","cpm_hour9","cpm_hour10","cpm_hour11",
-               "cpm_hour12","cpm_hour13","cpm_hour14","cpm_hour15","cpm_hour16","cpm_hour17","cpm_hour18",
-               "cpm_hour19","cpm_hour20","cpm_hour21","cpm_hour22","cpm_hour23","cpm_hour24")
-  varnames = c(varnames,paste("wk_",varnames[6:68],sep=""),paste("we_",varnames[6:68],sep=""))
-  colnames(averages) = varnames
-  
-  # Drop variables according to brevity and weekday.weekend settings
-  if (brevity==1) {
-    if (weekday.weekend==TRUE) {averages = averages[,c(1:8,69:71,132:134),drop=FALSE]}
-    else {averages = averages[,c(1:8),drop=FALSE]}
-  } else if (brevity==2) {
-    if (weekday.weekend==TRUE) {
-      if (is.null(steps)) {averages = averages[,c(1:8,10:44,69:71,73:107,132:134,136:170),drop=FALSE]}
-      else {averages = averages[,c(1:44,69:107,132:170),drop=FALSE]}
+  # If weekday.weekend is FALSE, just calculate overall averages
+  if (weekday.weekend==FALSE) {
+    averages = c(id=id,valid_days=length(locs.valid),include=0,colMeans(x=dayvars[locs.valid,4:ncol(dayvars)]))
+    if (length(locs.valid)>=valid.days & length(locs.valid.wk)>=valid.week.days & length(locs.valid.we)>=valid.weekend.days) {
+      averages[3] = 1
     }
-    else {
-      if (is.null(steps)) {averages = averages[,c(1:8,10:44),drop=FALSE]}
-      else {averages = averages[,1:44,drop=FALSE]}
+  } else {
+    
+    # Otherwise calculate averages by all valid days and by valid weekdays and valid weekend days
+    averages = c(id=id,valid_days=length(locs.valid),valid_week_days=length(locs.valid.wk),
+                 valid_weekend_days=length(locs.valid.we), include=0,
+                 colMeans(x=dayvars[locs.valid,4:ncol(dayvars)]),
+                 colMeans(x=dayvars[locs.valid.wk,4:ncol(dayvars)]),
+                 colMeans(x=dayvars[locs.valid.we,4:ncol(dayvars)]))
+    if (length(locs.valid)>=valid.days & length(locs.valid.wk)>=valid.week.days & length(locs.valid.we)>=valid.weekend.days) {
+      averages[5] = 1
     }
-  } else if (brevity==3) {
-    if (weekday.weekend==TRUE) {
-      if (is.null(steps)) {averages = averages[,c(1:8,10:71,73:134,136:194),drop=FALSE]}
-    }
-    else {
-      if (is.null(steps)) {averages = averages[,c(1:8,10:68),drop=FALSE]}
-      else {averages = averages[,1:68,drop=FALSE]}
-    }
+    
+    # Modify variable names for weekdays and weekends
+    numvars = (length(averages)-5)/3
+    names(averages)[(6+numvars):(6+2*numvars-1)] = paste("wk_",names(averages)[(6+numvars):(6+2*numvars-1)],sep="")
+    names(averages)[(6+2*numvars):(6+3*numvars-1)] = paste("we_",names(averages)[(6+2*numvars):(6+3*numvars-1)],sep="")
+    
   }
   
-  # If cpm.nci is TRUE, re-calculate averages for cpm
+  # If cpm.nci is TRUE, re-calculate averages for cpm variables
   if (cpm.nci==TRUE) {
-    averages[,"cpm"] = averages[,"counts"]/averages[,"valid_min"]
+    averages["cpm_vert"] = averages["counts_vert"]/averages["valid_min"]
+    averages["cpm_ap"] = averages["counts_ap"]/averages["valid_min"]
+    averages["cpm_ml"] = averages["counts_ap"]/averages["valid_min"]
+    averages["cpm_sum"] = averages["counts_ap"]/averages["valid_min"]
+    averages["cpm_mag"] = averages["counts_ap"]/averages["valid_min"]
   }
+  
+  # Convert averages to matrix for the hell of it
+  averages = matrix(averages,nrow=1,dimnames=list(NULL,names(averages)))
   
   # Return data frame(s)
   if (return.form==1) {

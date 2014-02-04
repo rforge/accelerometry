@@ -4,7 +4,7 @@
 Accelerometer artifact correction
 }
 \description{
-This function corrects abnormally high count values in uniaxial minute-to-minute accelerometer data by replacing such values with the average of the neighboring count values.
+This function corrects abnormally high count values in minute-to-minute accelerometer data by replacing such values with the average of the neighboring count values.
 }
 \usage{
 accel.artifacts(counts, thresh = 32767, skipchecks = FALSE)
@@ -39,7 +39,7 @@ An integer vector is returned despite the average calculation often producing a 
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}
 }
 \seealso{
-\code{\link{accel.process}}
+\code{\link{accel.process.uni}}, \code{\link{accel.process.tri}}
 }
 \examples{
 # Load in sample data frame

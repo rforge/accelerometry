@@ -4,7 +4,7 @@
 Classification of physical activity intensities
 }
 \description{
-This function computes the number of minutes with counts in user-defined intensity levels, and the number of counts accumulated during time spent in each intensity level. It is intended for use with uniaxial minute-to-minute accelerometer data.
+This function computes the number of minutes with counts in user-defined intensity levels, and the number of counts accumulated during time spent in each intensity level. It is intended for use with minute-to-minute accelerometer data.
 }
 \usage{
 accel.intensities(counts, thresh = c(100,760,2020,5999), skipchecks = FALSE)
@@ -37,7 +37,7 @@ Users should generally input a vector of counts that occur during wear time only
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}
 }
 \seealso{
-\code{\link{accel.weartime}}, \code{\link{accel.process}}
+\code{\link{accel.weartime}}, \code{\link{accel.process.uni}}, \code{\link{accel.process.tri}}
 }
 \examples{
 # Load in sample data frame

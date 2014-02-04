@@ -4,7 +4,7 @@
 Accelerometer non-wear detection
 }
 \description{
-This function identifies periods of non-wear time in uniaxial, minute-to-minute accelerometer data.
+This function identifies periods of non-wear time in minute-to-minute accelerometer data.
 }
 \usage{
 accel.weartime(counts, window = 60, tol = 0, tol.upper = 99, nci = FALSE, 
@@ -55,7 +55,7 @@ Leaving days.distinct set to FALSE is strongly encouraged. If set to TRUE, non-w
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}
 }
 \seealso{
-\code{\link{accel.process}}
+\code{\link{accel.process.uni}}, \code{\link{accel.process.tri}}
 }
 \examples{
 # Load in sample data frame
