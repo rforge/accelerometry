@@ -522,15 +522,15 @@ rle2 <- function(x) {
   
 }
 
-accel.process.uni <- function(counts, steps = NULL, days = NULL, id = NULL, brevity = 1, valid.days = 1,
-                              valid.week.days = 0, valid.weekend.days = 0, int.cuts = c(100,760,2020,5999),
-                              cpm.nci = FALSE, days.distinct = FALSE, nonwear.window = 60, nonwear.tol = 0, 
-                              nonwear.tol.upper = 99, nonwear.nci = FALSE, weartime.minimum = 600, 
-                              weartime.maximum = 1440, use.partialdays = FALSE, active.bout.length = 10, 
-                              active.bout.tol = 0, mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0,
-                              active.bout.nci = FALSE, sed.bout.tol = 0, sed.bout.tol.maximum = int.cuts[2]-1,
-                              artifact.thresh = 25000, artifact.action = 1, weekday.weekend = FALSE, 
-                              return.form = 2) {
+accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1/5"), id = NULL, 
+                              brevity = 1, valid.days = 1, valid.week.days = 0, valid.weekend.days = 0, 
+                              int.cuts = c(100,760,2020,5999), cpm.nci = FALSE, days.distinct = FALSE, 
+                              nonwear.window = 60, nonwear.tol = 0, nonwear.tol.upper = 99, 
+                              nonwear.nci = FALSE, weartime.minimum = 600, weartime.maximum = 1440, 
+                              use.partialdays = FALSE, active.bout.length = 10, active.bout.tol = 0, 
+                              mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, active.bout.nci = FALSE, 
+                              sed.bout.tol = 0, sed.bout.tol.maximum = int.cuts[2]-1, artifact.thresh = 25000, 
+                              artifact.action = 1, weekday.weekend = FALSE, return.form = 2) {
     
   # If counts is a character, output error
   if (is.character(counts)) {
@@ -570,6 +570,11 @@ accel.process.uni <- function(counts, steps = NULL, days = NULL, id = NULL, brev
   # If length of steps and counts vectors are different, output error
   if (!is.null(steps) & length(steps)!=length(counts)) {
     stop("For counts= and steps= options, please enter objects of same length")
+  }
+  
+  # If start.date is not a date, output error
+  if (class(start.date)!="Date") {
+    stop("For start.date= option, please enter a valid date variable")
   }
   
   # If more than one id, output error
@@ -694,28 +699,17 @@ accel.process.uni <- function(counts, steps = NULL, days = NULL, id = NULL, brev
     stop("For return.form= option, please enter 1 for per-person, 2 for per-day, or 3 for both")
   }
   
-  # Get values that will be used more than once
+  # Get number of minutes of data
   datalength = length(counts)
-  
-  # If days vector not provided, assign day 1 = 1-1440, day 2 = 1441-2880, etc.
-  if (is.null(days)) {
-    days = rep(NA,datalength)
-    for (j in 1:ceiling(datalength/1440)) {
-      days[(1440*j-1439):min(1440*j,datalength)] = ceiling(j%%7.1)
-    }
-  }
   
   # If id value or vector is provided, get first value
   if (is.null(id)) {id = 1} else {id = id[1]}
   
-  # Finding start and end points of each day
-  mat = rle2(x=days)
+  # Calculate number of full days of data
+  numdays = ceil(datalength/1440)
   
-  # Initializing matrix to save daily physical activity variables
-  dayvars = matrix(NA,ncol=66,nrow=nrow(mat))
-  
-  # k is the "day counter"
-  k = 0
+  # Initialize matrix to save daily physical activity variables
+  dayvars = matrix(NA,ncol=66,nrow=numdays)
   
   # If artifact.action = 3, replace minutes with counts > artifact.thresh with average of surrounding minutes
   if (artifact.action==3) {counts = accel.artifacts(counts=counts,thresh=artifact.thresh)}
@@ -781,23 +775,42 @@ accel.process.uni <- function(counts, steps = NULL, days = NULL, id = NULL, brev
                               skipchecks=TRUE)
   }
   
-  # Looping through accelerometer data for i days
-  for (i in 1:nrow(mat)) { 
+  # Get day of week
+  currentday = weekdays(start.date-1)
+  if (currentday=="Sunday") {
+    currentday = 1
+  } else if (currentday=="Monday") {
+    currentday = 2
+  } else if (currentday=="Tuesday") {
+    currentday = 3
+  } else if (currentday=="Wednesday") {
+    currentday = 4
+  } else if (currentday=="Thursday") {
+    currentday = 5
+  } else if (currentday=="Friday") {
+    currentday = 6
+  } else if (currentday=="Saturday") {
+    currentday = 7
+  }
+  
+  # Loop through accelerometer data for i days
+  for (i in 1:numdays) { 
     
-    # Row index for physical activity variable matrix
-    k = k + 1
+    # Update day of week
+    currentday = currentday + 1
+    if (currentday==8) {currentday = 1}
     
-    # Loading accelerometer data from day i
-    day.counts = counts[mat[i,2]:mat[i,3]]
-    day.wearflag = wearflag[mat[i,2]:mat[i,3]]
+    # Load accelerometer data from day i    
+    day.counts = counts[((i-1)*1440+1):(i*1440)]
+    day.wearflag = wearflag[((i-1)*1440+1):(i*1440)]
     if (brevity==2 | brevity==3) {
-      day.boutedMVPA = boutedMVPA[mat[i,2]:mat[i,3]]
-      day.boutedvig = boutedvig[mat[i,2]:mat[i,3]]
-      day.boutedsed10 = boutedsed10[mat[i,2]:mat[i,3]]
-      day.boutedsed30 = boutedsed30[mat[i,2]:mat[i,3]]
-      day.boutedsed60 = boutedsed60[mat[i,2]:mat[i,3]]
+      day.boutedMVPA = boutedMVPA[((i-1)*1440+1):(i*1440)]
+      day.boutedvig = boutedvig[((i-1)*1440+1):(i*1440)]
+      day.boutedsed10 = boutedsed10[((i-1)*1440+1):(i*1440)]
+      day.boutedsed30 = boutedsed30[((i-1)*1440+1):(i*1440)]
+      day.boutedsed60 = boutedsed60[((i-1)*1440+1):(i*1440)]
     }
-    if (!is.null(steps)) {day.steps = steps[mat[i,2]:mat[i,3]]}
+    if (!is.null(steps)) {day.steps = steps[((i-1)*1440+1):(i*1440)]}
     
     # Calculate constants that are used more than once
     daywear = sum(day.wearflag)
@@ -805,72 +818,72 @@ accel.process.uni <- function(counts, steps = NULL, days = NULL, id = NULL, brev
     daylength = length(day.counts)
     
     # ID number
-    dayvars[k,1] = id
+    dayvars[i,1] = id
     
     # Day of week
-    dayvars[k,2] = mat[i,1]
+    dayvars[i,2] = currentday
     
     # Check whether day is valid for analysis; if not, mark as invalid
     if (daywear<weartime.minimum | daywear>weartime.maximum | (artifact.action==1 & maxcount>=artifact.thresh) |
           (use.partialdays==FALSE & daylength<1440)) {
-      dayvars[k,3] = 0
+      dayvars[i,3] = 0
     } else {
-      dayvars[k,3] = 1
+      dayvars[i,3] = 1
     }
     
     # Minutes of valid wear time
-    dayvars[k,4] = daywear
+    dayvars[i,4] = daywear
     
-    # Storing day.counts[day.wearflag==1] into its own vector
+    # Store day.counts[day.wearflag==1] into its own vector
     day.counts.valid = day.counts[day.wearflag==1]
     
     # Total counts during wear time
-    dayvars[k,5] = sum(day.counts.valid)
+    dayvars[i,5] = sum(day.counts.valid)
     
     # Counts per minute - calculated as total counts during wear time divided by wear time
-    dayvars[k,6] = dayvars[k,5]/dayvars[k,4]
+    dayvars[i,6] = dayvars[i,5]/dayvars[i,4]
     
     # Steps
     if (!is.null(steps)) {
-      dayvars[k,7] = sum(day.steps[day.wearflag==1])
+      dayvars[i,7] = sum(day.steps[day.wearflag==1])
     }
     
     if (brevity==2 | brevity==3) {
       
       # Minutes in various intensity levels
       intensities = accel.intensities(counts=day.counts.valid,thresh=int.cuts)
-      dayvars[k,8:15] = intensities[1:8]
+      dayvars[i,8:15] = intensities[1:8]
       
       # Proportions of daily wear time in each intensity level
-      dayvars[k,16:23] = dayvars[k,8:15]/daywear
+      dayvars[i,16:23] = dayvars[i,8:15]/daywear
       
       # Counts accumulated during wear time in each intensity level  
-      dayvars[k,24:31] = intensities[9:16]
+      dayvars[i,24:31] = intensities[9:16]
       
       # Bouted sedentary time
-      dayvars[k,32] = sum(day.boutedsed10)
-      dayvars[k,33] = sum(day.boutedsed30)
-      dayvars[k,34] = sum(day.boutedsed60)
+      dayvars[i,32] = sum(day.boutedsed10)
+      dayvars[i,33] = sum(day.boutedsed30)
+      dayvars[i,34] = sum(day.boutedsed60)
       
       # Sedentary breaks
-      dayvars[k,35] = accel.sedbreaks(counts=day.counts,weartime=day.wearflag,thresh=int.cuts[1],skipchecks=TRUE)
+      dayvars[i,35] = accel.sedbreaks(counts=day.counts,weartime=day.wearflag,thresh=int.cuts[1],skipchecks=TRUE)
       
       # Maximum 1-min, 5-min, 10-min, and 30-min count averages
-      dayvars[k,36] = maxcount
-      dayvars[k,37] = movingaves(x=day.counts,window=5,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,38] = movingaves(x=day.counts,window=10,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,39] = movingaves(x=day.counts,window=30,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,36] = maxcount
+      dayvars[i,37] = movingaves(x=day.counts,window=5,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,38] = movingaves(x=day.counts,window=10,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,39] = movingaves(x=day.counts,window=30,return.max=TRUE,skipchecks=TRUE)
       
       # MVPA and vigorous physical activity in >= 10-min bouts
-      dayvars[k,40] = sum(day.boutedMVPA)
-      dayvars[k,41] = sum(day.boutedvig)
-      dayvars[k,42] = sum(dayvars[k,40:41])
+      dayvars[i,40] = sum(day.boutedMVPA)
+      dayvars[i,41] = sum(day.boutedvig)
+      dayvars[i,42] = sum(dayvars[i,40:41])
       
       if (brevity==3) {
         
         # Hourly counts/min averages
         if (daylength==1440) {
-          dayvars[k,43:66] = blockaves(x=day.counts,window=60,skipchecks=TRUE)
+          dayvars[i,43:66] = blockaves(x=day.counts,window=60,skipchecks=TRUE)
         }
         
       }
@@ -953,8 +966,8 @@ accel.process.uni <- function(counts, steps = NULL, days = NULL, id = NULL, brev
 }
 
 
-accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, brevity = 1, valid.days = 1, 
-                              valid.week.days = 0, valid.weekend.days = 0, int.axis = "vert",
+accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("2014/1/5"), id = NULL, brevity = 1, 
+                              valid.days = 1, valid.week.days = 0, valid.weekend.days = 0, int.axis = "vert",
                               int.cuts = c(100,760,2020,5999), cpm.nci = FALSE, hourly.axis = "vert",
                               days.distinct = FALSE, nonwear.axis = "vert", nonwear.window = 60, nonwear.tol = 0, 
                               nonwear.tol.upper = 99, nonwear.nci = FALSE, weartime.minimum = 600, 
@@ -999,6 +1012,11 @@ accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, 
     stop("For counts.tri= and steps= options, please enter objects of same length")
   }
   
+  # If start.date is not a date, output error
+  if (class(start.date)!="Date") {
+    stop("For start.date= option, please enter a valid date variable")
+  }
+  
   # If more than one id, output error
   if (!is.null(id) & length(unique(id))>1) {
     stop("For id= option, please enter either a single ID number or a vector with repeated value of a single ID number")
@@ -1018,7 +1036,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, 
   
   # If int.axis is out of range, output error
   if (!int.axis %in% c("vert","ap","ml","sum","mag")) {
-    stop("For int.axis= option, please enter one of the following: vert, ap, ml, sum, mag")
+    stop("For int.axis= option, please enter 'vert', 'ap', 'ml', 'sum', or 'mag'")
   }
   
   # If length of int.cuts is not 4, or if values are out of range, output error
@@ -1033,7 +1051,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, 
   
   # If hourly.axis is out of range, output error
   if (!hourly.axis %in% c("vert","ap","ml","sum","mag")) {
-    stop("For hourly.axis= option, please enter one of the following: vert, ap, ml, sum, mag")
+    stop("For hourly.axis= option, please enter 'vert', 'ap', 'ml', 'sum', or 'mag'")
   }
   
   # If days.distinct is not a logical, output error
@@ -1043,7 +1061,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, 
   
   # If nonwear.axis is out of range, output error
   if (!nonwear.axis %in% c("vert","ap","ml","sum","mag")) {
-    stop("For nonwear.axis= option, please enter one of the following: vert, ap, ml, sum, mag")
+    stop("For nonwear.axis= option, please enter 'vert', 'ap', 'ml', 'sum', or 'mag'")
   }
   
   # If If nonwear.window is out of range, output error
@@ -1137,27 +1155,16 @@ accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, 
   }
   
   # Get number of minutes of data
-  datalength = nrow(counts.tri)
-  
-  # If days vector not provided, assign day 1 = 1-1440, day 2 = 1441-2880, etc.
-  if (is.null(days)) {
-    days = rep(NA,datalength)
-    for (j in 1:ceiling(datalength/1440)) {
-      days[(1440*j-1439):min(1440*j,datalength)] = ceiling(j%%7.1)
-    }
-  }
+  datalength = nrow(counts)
   
   # If id value or vector is provided, get first value
   if (is.null(id)) {id = 1} else {id = id[1]}
   
-  # Finding start and end points of each day
-  mat = rle2(x=days)
+  # Calculate number of full days of data
+  numdays = ceil(datalength/1440)
   
   # Initializing matrix to save daily physical activity variables
-  dayvars = matrix(NA,ncol=122,nrow=nrow(mat))
-  
-  # k is the "day counter"
-  k = 0
+  dayvars = matrix(NA,ncol=122,nrow=numdays)
   
   # Calculate triaxial sum and vector magnitude and add to counts.tri
   counts.tri = cbind(counts.tri,.rowSums(X=counts.tri,m=datalength,n=3),
@@ -1267,23 +1274,42 @@ accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, 
                               skipchecks=TRUE)
   }
   
-  # Looping through accelerometer data for i days
-  for (i in 1:nrow(mat)) { 
+  # Get day of week
+  currentday = weekdays(start.date-1)
+  if (currentday=="Sunday") {
+    currentday = 1
+  } else if (currentday=="Monday") {
+    currentday = 2
+  } else if (currentday=="Tuesday") {
+    currentday = 3
+  } else if (currentday=="Wednesday") {
+    currentday = 4
+  } else if (currentday=="Thursday") {
+    currentday = 5
+  } else if (currentday=="Friday") {
+    currentday = 6
+  } else if (currentday=="Saturday") {
+    currentday = 7
+  }
+  
+  # Loop through accelerometer data for i days
+  for (i in 1:numdays) { 
     
-    # Row index for physical activity variable matrix
-    k = k + 1
+    # Update day of week
+    currentday = currentday + 1
+    if (currentday==8) {currentday = 1}
     
-    # Loading accelerometer data from day i
-    day.counts = counts.tri[mat[i,2]:mat[i,3],]
-    day.wearflag = wearflag[mat[i,2]:mat[i,3]]
+    # Load accelerometer data from day i
+    day.counts = counts.tri[((i-1)*1440+1):(i*1440),]
+    day.wearflag = wearflag[((i-1)*1440+1):(i*1440)]
     if (brevity==2 | brevity==3) {
-      day.boutedMVPA = boutedMVPA[mat[i,2]:mat[i,3]]
-      day.boutedvig = boutedvig[mat[i,2]:mat[i,3]]
-      day.boutedsed10 = boutedsed10[mat[i,2]:mat[i,3]]
-      day.boutedsed30 = boutedsed30[mat[i,2]:mat[i,3]]
-      day.boutedsed60 = boutedsed60[mat[i,2]:mat[i,3]]
+      day.boutedMVPA = boutedMVPA[((i-1)*1440+1):(i*1440)]
+      day.boutedvig = boutedvig[((i-1)*1440+1):(i*1440)]
+      day.boutedsed10 = boutedsed10[((i-1)*1440+1):(i*1440)]
+      day.boutedsed30 = boutedsed30[((i-1)*1440+1):(i*1440)]
+      day.boutedsed60 = boutedsed60[((i-1)*1440+1):(i*1440)]
     }
-    if (!is.null(steps)) {day.steps = steps[mat[i,2]:mat[i,3]]}
+    if (!is.null(steps)) {day.steps = steps[((i-1)*1440+1):(i*1440)]}
     
     # Calculate constants that are used more than once
     daywear = sum(day.wearflag)
@@ -1291,21 +1317,21 @@ accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, 
     daylength = nrow(day.counts)
     
     # ID number
-    dayvars[k,1] = id
+    dayvars[i,1] = id
     
     # Day of week
-    dayvars[k,2] = mat[i,1]
+    dayvars[i,2] = currentday
     
     # Check whether day is valid for analysis; if not, mark as invalid
     if (daywear<weartime.minimum | daywear>weartime.maximum | (artifact.action==1 & maxcounts[artifact.axis]>=artifact.thresh) |
           (use.partialdays==FALSE & daylength<1440)) {
-      dayvars[k,3] = 0
+      dayvars[i,3] = 0
     } else {
-      dayvars[k,3] = 1
+      dayvars[i,3] = 1
     }
     
     # Minutes of valid wear time
-    dayvars[k,4] = daywear
+    dayvars[i,4] = daywear
     
     # Store each axis of counts in its own vector
     day.counts.vert = day.counts[,1]
@@ -1319,14 +1345,14 @@ accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, 
     day.counts.valid = day.counts[day.wearflag==1,]
     
     # Total counts during wear time in each axis
-    dayvars[k,5:9] = .colSums(X=day.counts.valid, m=daywear, n=5)
+    dayvars[i,5:9] = .colSums(X=day.counts.valid, m=daywear, n=5)
     
     # Counts per minute
-    dayvars[k,10:14] = dayvars[k,5:9]/dayvars[k,4]
+    dayvars[i,10:14] = dayvars[i,5:9]/dayvars[i,4]
     
     # Steps
     if (!is.null(steps)) {
-      dayvars[k,15] = sum(day.steps[day.wearflag==1])
+      dayvars[i,15] = sum(day.steps[day.wearflag==1])
     }
     
     if (brevity==2 | brevity==3) {
@@ -1338,63 +1364,63 @@ accel.process.tri <- function(counts.tri, steps = NULL, days = NULL, id = NULL, 
       intensity = cut(x=day.counts.valid.int,breaks=c(0,int.cuts,Inf),right=FALSE,labels=1:5)
       
       # Minutes in various intensity levels
-      dayvars[k,16:20] = table(intensity)
-      dayvars[k,21] = dayvars[k,17]+dayvars[k,18]
-      dayvars[k,22] = dayvars[k,19]+dayvars[k,20]
-      dayvars[k,23] = daywear-dayvars[k,16]
+      dayvars[i,16:20] = table(intensity)
+      dayvars[i,21] = dayvars[i,17]+dayvars[i,18]
+      dayvars[i,22] = dayvars[i,19]+dayvars[i,20]
+      dayvars[i,23] = daywear-dayvars[i,16]
       
       # Proportions of daily wear time in each intensity level
-      dayvars[k,24:31] = dayvars[k,16:23]/daywear
-      dayvars[k,32:36] = apply(X=day.counts.valid[intensity==1,],MARGIN=2,FUN=sum)
-      dayvars[k,37:41] = apply(X=day.counts.valid[intensity==2,],MARGIN=2,FUN=sum)
-      dayvars[k,42:46] = apply(X=day.counts.valid[intensity==3,],MARGIN=2,FUN=sum)
-      dayvars[k,47:51] = apply(X=day.counts.valid[intensity==4,],MARGIN=2,FUN=sum)
-      dayvars[k,52:56] = apply(X=day.counts.valid[intensity==5,],MARGIN=2,FUN=sum)
-      dayvars[k,57:61] = apply(X=day.counts.valid[intensity %in% c(2,3),],MARGIN=2,FUN=sum)
-      dayvars[k,62:66] = apply(X=day.counts.valid[intensity %in% c(4,5),],MARGIN=2,FUN=sum)
-      dayvars[k,67:71] = apply(X=day.counts.valid[intensity %in% c(2,3,4,5),],MARGIN=2,FUN=sum)
+      dayvars[i,24:31] = dayvars[i,16:23]/daywear
+      dayvars[i,32:36] = apply(X=day.counts.valid[intensity==1,],MARGIN=2,FUN=sum)
+      dayvars[i,37:41] = apply(X=day.counts.valid[intensity==2,],MARGIN=2,FUN=sum)
+      dayvars[i,42:46] = apply(X=day.counts.valid[intensity==3,],MARGIN=2,FUN=sum)
+      dayvars[i,47:51] = apply(X=day.counts.valid[intensity==4,],MARGIN=2,FUN=sum)
+      dayvars[i,52:56] = apply(X=day.counts.valid[intensity==5,],MARGIN=2,FUN=sum)
+      dayvars[i,57:61] = apply(X=day.counts.valid[intensity %in% c(2,3),],MARGIN=2,FUN=sum)
+      dayvars[i,62:66] = apply(X=day.counts.valid[intensity %in% c(4,5),],MARGIN=2,FUN=sum)
+      dayvars[i,67:71] = apply(X=day.counts.valid[intensity %in% c(2,3,4,5),],MARGIN=2,FUN=sum)
       
       # Bouted sedentary time
-      dayvars[k,72] = sum(day.boutedsed10)
-      dayvars[k,73] = sum(day.boutedsed30)
-      dayvars[k,74] = sum(day.boutedsed60)
+      dayvars[i,72] = sum(day.boutedsed10)
+      dayvars[i,73] = sum(day.boutedsed30)
+      dayvars[i,74] = sum(day.boutedsed60)
       
       # Sedentary breaks
-      dayvars[k,75] = accel.sedbreaks(counts=day.counts.int,weartime=day.wearflag,thresh=int.cuts[1],skipchecks=TRUE)
+      dayvars[i,75] = accel.sedbreaks(counts=day.counts.int,weartime=day.wearflag,thresh=int.cuts[1],skipchecks=TRUE)
       
       # Maximum 1-min, 5-min, 10-min, and 30-min count averages
-      dayvars[k,76:80] = maxcounts
-      dayvars[k,81] = movingaves(x=day.counts.vert,window=5,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,82] = movingaves(x=day.counts.ap,window=5,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,83] = movingaves(x=day.counts.ml,window=5,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,84] = movingaves(x=day.counts.sum,window=5,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,85] = movingaves(x=day.counts.mag,window=5,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,76:80] = maxcounts
+      dayvars[i,81] = movingaves(x=day.counts.vert,window=5,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,82] = movingaves(x=day.counts.ap,window=5,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,83] = movingaves(x=day.counts.ml,window=5,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,84] = movingaves(x=day.counts.sum,window=5,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,85] = movingaves(x=day.counts.mag,window=5,return.max=TRUE,skipchecks=TRUE)
       
-      dayvars[k,86] = movingaves(x=day.counts.vert,window=10,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,87] = movingaves(x=day.counts.ap,window=10,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,88] = movingaves(x=day.counts.ml,window=10,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,89] = movingaves(x=day.counts.sum,window=10,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,90] = movingaves(x=day.counts.mag,window=10,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,86] = movingaves(x=day.counts.vert,window=10,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,87] = movingaves(x=day.counts.ap,window=10,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,88] = movingaves(x=day.counts.ml,window=10,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,89] = movingaves(x=day.counts.sum,window=10,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,90] = movingaves(x=day.counts.mag,window=10,return.max=TRUE,skipchecks=TRUE)
       
-      dayvars[k,91] = movingaves(x=day.counts.vert,window=30,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,92] = movingaves(x=day.counts.ap,window=30,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,93] = movingaves(x=day.counts.ml,window=30,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,94] = movingaves(x=day.counts.sum,window=30,return.max=TRUE,skipchecks=TRUE)
-      dayvars[k,95] = movingaves(x=day.counts.mag,window=30,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,91] = movingaves(x=day.counts.vert,window=30,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,92] = movingaves(x=day.counts.ap,window=30,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,93] = movingaves(x=day.counts.ml,window=30,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,94] = movingaves(x=day.counts.sum,window=30,return.max=TRUE,skipchecks=TRUE)
+      dayvars[i,95] = movingaves(x=day.counts.mag,window=30,return.max=TRUE,skipchecks=TRUE)
       
       # MVPA and vigorous physical activity in >= 10-min bouts
-      dayvars[k,96] = sum(day.boutedMVPA)
-      dayvars[k,97] = sum(day.boutedvig)
-      dayvars[k,98] = sum(dayvars[k,64:65])
+      dayvars[i,96] = sum(day.boutedMVPA)
+      dayvars[i,97] = sum(day.boutedvig)
+      dayvars[i,98] = sum(dayvars[i,64:65])
       
       if (brevity==3) {
         
         # Hourly counts/min averages
         if (daylength==1440) {
           if (hourly.axis=="vert") {
-            dayvars[k,99:122] = blockaves(x=day.counts,window=60,skipchecks=TRUE)
+            dayvars[i,99:122] = blockaves(x=day.counts,window=60,skipchecks=TRUE)
           } else {
-            dayvars[k,99:122] = blockaves(x=day.counts[,hourly.axis],window=60,skipchecks=TRUE)
+            dayvars[i,99:122] = blockaves(x=day.counts[,hourly.axis],window=60,skipchecks=TRUE)
           }
         }
         

@@ -7,9 +7,10 @@ Process triaxial minute-to-minute accelerometer data
 This function calculates a variety of physical activity variables based on triaxial minute-to-minute accelerometer data for individual participants. A data dictionary for the variables returned is available on the author's website, \url{https://sites.google.com/site/danevandomelen/}.
 }
 \usage{
-accel.process.tri(counts.tri, steps = NULL, days = NULL, id = NULL, brevity = 1, 
-                  valid.days = 1, valid.week.days = 0, valid.weekend.days = 0, 
-                  int.axis = "vert", int.cuts = c(100, 760, 2020, 5999), cpm.nci = FALSE, 
+accel.process.tri(counts.tri, steps = NULL, start.date = as.Date("2014/1/5"), id = NULL, 
+                  brevity = 1, valid.days = 1, valid.week.days = 0, 
+                  valid.weekend.days = 0, int.axis = "vert", 
+                  int.cuts = c(100, 760, 2020, 5999), cpm.nci = FALSE, 
                   hourly.axis = "vert", days.distinct = FALSE, nonwear.axis = "vert", 
                   nonwear.window = 60, nonwear.tol = 0, nonwear.tol.upper = 99, 
                   nonwear.nci = FALSE, weartime.minimum = 600, weartime.maximum = 1440, 
@@ -27,8 +28,8 @@ Three-column accelerometer counts matrix or data frame, where columns 1-3 repres
   \item{steps}{
 Steps vector; must be same length as counts.tri (if specified).
 }
-  \item{days}{
-Days vector, where 1 = Sunday, ... , 7 = Saturday; must be same length as counts (if specified).
+  \item{start.date}{
+Date of first day of monitoring (must be of class 'date'). Only used to extract day of week, so if day of week is known but date is not, user can enter any date that corresponds to that day of the week. The default date corresonds to the first Sunday in January 2014. 
 }
   \item{id}{
 Either a single value or a vector indicating the ID number for the participant whose accelerometer data was entered.
@@ -136,6 +137,8 @@ Acknowledgment: This material is based upon work supported by the National Scien
 Dane R. Van Domelen
 }
 \note{
+The first 1440 minutes of data must represent a full day of monitoring, i.e. midnight to midnight. If a partial day of data is present, it must be removed before calling accel.process.tri.
+
 This function is similar to \code{\link{accel.process.uni}}, but works with triaxial accelerometer data. For example, rather than just calculating a single counts variable for each day of monitoring, accel.process.tri calculates a daily counts variable for the vertical axis, anteroposterior (AP) axis, and mediolateral (ML) axis, and also for the triaxial sum and triaxial vector magnitude (defined as the square root of the sum of the squares of the three axes). Also, the user can choose which of the five signals to use for artifact correction, non-wear detection, activity intensity classification, and hourly counts per minute averaging. 
 
 In the future, a sample triaxial dataset will be included in the package and some Examples will be provided below. For now, researchers should see the Examples for \code{\link{accel.process.uni}}. This function has very similar inputs. 

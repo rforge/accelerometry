@@ -7,14 +7,15 @@ Process uniaxial minute-to-minute accelerometer data
 This function calculates a variety of physical activity variables based on uniaxial minute-to-minute accelerometer data for individual participants. A data dictionary for the variables returned is available on the author's website, \url{https://sites.google.com/site/danevandomelen/}.
 }
 \usage{
-accel.process.uni(counts, steps = NULL, days = NULL, id = NULL, brevity = 1, 
-                  valid.days = 1, valid.week.days = 0, valid.weekend.days = 0, 
-                  int.cuts = c(100,760,2020,5999), cpm.nci = FALSE, 
-                  days.distinct = FALSE, nonwear.window = 60, nonwear.tol = 0, 
-                  nonwear.tol.upper = 99, nonwear.nci = FALSE, weartime.minimum = 600, 
-                  weartime.maximum = 1200, use.partialdays = FALSE, 
-                  active.bout.length = 10, active.bout.tol = 0, mvpa.bout.tol.lower = 0, 
-                  vig.bout.tol.lower = 0, active.bout.nci = FALSE, sed.bout.tol = 0, 
+accel.process.uni(counts, steps = NULL, start.date = as.Date("2014/1/5"), id = NULL, 
+                  brevity = 1, valid.days = 1, valid.week.days = 0, 
+                  valid.weekend.days = 0, int.cuts = c(100,760,2020,5999), 
+                  cpm.nci = FALSE, days.distinct = FALSE, nonwear.window = 60, 
+                  nonwear.tol = 0, nonwear.tol.upper = 99, nonwear.nci = FALSE, 
+                  weartime.minimum = 600, weartime.maximum = 1440, 
+                  use.partialdays = FALSE, active.bout.length = 10, active.bout.tol = 0, 
+                  mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, 
+                  active.bout.nci = FALSE, sed.bout.tol = 0, 
                   sed.bout.tol.maximum = int.cuts[2]-1, artifact.thresh = 25000, 
                   artifact.action = 1, weekday.weekend = FALSE, return.form = 2)
 }
@@ -25,8 +26,8 @@ Time series accelerometer counts vector
   \item{steps}{
 Steps vector; must be same length as counts (if specified).
 }
-  \item{days}{
-Days vector, where 1 = Sunday, ... , 7 = Saturday; must be same length as counts (if specified).
+  \item{start.date}{
+Date of first day of monitoring (must be of class 'date'). Only used to extract day of week, so if day of week is known but date is not, user can enter any date that corresponds to that day of the week. The default date corresonds to the first Sunday in January 2014. 
 }
   \item{id}{
 Either a single value or a vector indicating the ID number for the participant whose accelerometer data was entered.
@@ -124,6 +125,8 @@ Acknowledgment: This material is based upon work supported by the National Scien
 Dane R. Van Domelen
 }
 \note{
+The first 1440 minutes of data must represent a full day of monitoring, i.e. midnight to midnight. If a partial day of data is present, it must be removed before calling accel.process.uni.
+
 Leaving days.distinct set to FALSE is strongly encouraged. If set to TRUE, activity bouts and non-wear periods that span the end of one day and the beginning of the next may be missed. This option is included because it is necessary to reproduce the algorithm used in the NCI's SAS programs [2].
 
 The default for weartime.maximum is 1440, but it may be better to set it to a lower value (e.g. 1200) if the participants were instructed to remove their accelerometers for sleeping. Daily wear time greater than 1200 minutes corresponds to less than 4 hours of sleep. In these cases it seems more likely that the participant slept while wearing the device, and as a result had small movements overnight show up as wear time. This could inflate estimates of sedentary time and shrink estimates of physical activity, e.g. counts per minute (CPM). 
