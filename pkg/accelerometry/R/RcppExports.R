@@ -801,16 +801,16 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
     if (currentday==8) {currentday = 1}
     
     # Load accelerometer data from day i    
-    day.counts = counts[((i-1)*1440+1):(i*1440)]
-    day.wearflag = wearflag[((i-1)*1440+1):(i*1440)]
+    day.counts = counts[((i-1)*1440+1):min(i*1440,datalength)]
+    day.wearflag = wearflag[((i-1)*1440+1):min(i*1440,datalength)]
     if (brevity==2 | brevity==3) {
-      day.boutedMVPA = boutedMVPA[((i-1)*1440+1):(i*1440)]
-      day.boutedvig = boutedvig[((i-1)*1440+1):(i*1440)]
-      day.boutedsed10 = boutedsed10[((i-1)*1440+1):(i*1440)]
-      day.boutedsed30 = boutedsed30[((i-1)*1440+1):(i*1440)]
-      day.boutedsed60 = boutedsed60[((i-1)*1440+1):(i*1440)]
+      day.boutedMVPA = boutedMVPA[((i-1)*1440+1):min(i*1440,datalength)]
+      day.boutedvig = boutedvig[((i-1)*1440+1):min(i*1440,datalength)]
+      day.boutedsed10 = boutedsed10[((i-1)*1440+1):min(i*1440,datalength)]
+      day.boutedsed30 = boutedsed30[((i-1)*1440+1):min(i*1440,datalength)]
+      day.boutedsed60 = boutedsed60[((i-1)*1440+1):min(i*1440,datalength)]
     }
-    if (!is.null(steps)) {day.steps = steps[((i-1)*1440+1):(i*1440)]}
+    if (!is.null(steps)) {day.steps = steps[((i-1)*1440+1):min(i*1440,datalength)]}
     
     # Calculate constants that are used more than once
     daywear = sum(day.wearflag)
@@ -1300,16 +1300,16 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     if (currentday==8) {currentday = 1}
     
     # Load accelerometer data from day i
-    day.counts = counts.tri[((i-1)*1440+1):(i*1440),]
-    day.wearflag = wearflag[((i-1)*1440+1):(i*1440)]
+    day.counts = counts.tri[((i-1)*1440+1):min(i*1440,datalength),]
+    day.wearflag = wearflag[((i-1)*1440+1):min(i*1440,datalength)]
     if (brevity==2 | brevity==3) {
-      day.boutedMVPA = boutedMVPA[((i-1)*1440+1):(i*1440)]
-      day.boutedvig = boutedvig[((i-1)*1440+1):(i*1440)]
-      day.boutedsed10 = boutedsed10[((i-1)*1440+1):(i*1440)]
-      day.boutedsed30 = boutedsed30[((i-1)*1440+1):(i*1440)]
-      day.boutedsed60 = boutedsed60[((i-1)*1440+1):(i*1440)]
+      day.boutedMVPA = boutedMVPA[((i-1)*1440+1):min(i*1440,datalength)]
+      day.boutedvig = boutedvig[((i-1)*1440+1):min(i*1440,datalength)]
+      day.boutedsed10 = boutedsed10[((i-1)*1440+1):min(i*1440,datalength)]
+      day.boutedsed30 = boutedsed30[((i-1)*1440+1):min(i*1440,datalength)]
+      day.boutedsed60 = boutedsed60[((i-1)*1440+1):min(i*1440,datalength)]
     }
-    if (!is.null(steps)) {day.steps = steps[((i-1)*1440+1):(i*1440)]}
+    if (!is.null(steps)) {day.steps = steps[((i-1)*1440+1):min(i*1440,datalength)]}
     
     # Calculate constants that are used more than once
     daywear = sum(day.wearflag)
