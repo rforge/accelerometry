@@ -67,22 +67,21 @@ mvpa.bouts.flag <- accel.bouts(counts = counts.part1, weartime = weartime.flag,
 max.10min.movingave <- movingaves(x=counts.part1,window=10,return.max=TRUE)
 
 # Process data from ID 21005 and request per-day variables
-accel.days <- accel.process.uni(counts = counts.part1, days = days.part1, id = id.part1)
+accel.days <- accel.process.uni(counts = counts.part1, id = id.part1)
 
 # Process data from ID 21005 and request daily averages
-accel.averages <- accel.process.uni(counts = counts.part1, days = days.part1, 
-                                    id = id.part1, return.form = 1)
+accel.averages <- accel.process.uni(counts = counts.part1, id = id.part1, 
+                                    return.form = 1)
 
 # Process data from ID 21005 and request per-day variables and daily averages
-accel.list <- accel.process.uni(counts = counts.part1, days = days.part1, 
-                                id = id.part1, return.form = 3)
+accel.list <- accel.process.uni(counts = counts.part1,  id = id.part1, return.form = 3)
                   
 # Process data according to methods used in NCI's SAS programs [2]
-accel.nci <- accel.process.uni(counts = counts.part1, days = days.part1, id = id.part1,
-                               brevity = 2, valid.days = 4, cpm.nci = TRUE, 
-                               days.distinct = TRUE, nonwear.tol = 2, 
-                               nonwear.tol.upper = 100, nonwear.nci = TRUE, 
-                               weartime.maximum = 1440, active.bout.tol = 2, 
-                               active.bout.nci = TRUE, artifact.thresh = 32767, 
-                               artifact.action = 3, return.form = 3)
+accel.nci <- accel.process.uni(counts = counts.part1, id = id.part1, brevity = 2, 
+                               valid.days = 4, cpm.nci = TRUE, days.distinct = TRUE, 
+                               nonwear.tol = 2, nonwear.tol.upper = 100, 
+                               nonwear.nci = TRUE, weartime.maximum = 1440, 
+                               active.bout.tol = 2, active.bout.nci = TRUE, 
+                               artifact.thresh = 32767, artifact.action = 3, 
+                               return.form = 3)
 }
