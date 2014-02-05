@@ -1168,7 +1168,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
   
   # Calculate triaxial sum and vector magnitude and add to counts.tri
   counts.tri = cbind(counts.tri,.rowSums(X=counts.tri,m=datalength,n=3),
-                     apply(X=counts.tri, MARGIN=1, FUN = function(x) {sqrt(x[1]^2+x[2]^2+x[3]^2)}))
+                     sqrt(counts.tri[,1]^2+counts.tri[,2]^2+counts.tri[,3]^2))
   
   # Add column names to counts matrix
   colnames(counts.tri) = c("vert","ap","ml","sum","mag")
@@ -1303,6 +1303,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     day.counts = counts.tri[((i-1)*1440+1):min(i*1440,datalength),]
     day.wearflag = wearflag[((i-1)*1440+1):min(i*1440,datalength)]
     if (brevity==2 | brevity==3) {
+      day.intvec = intvec[((i-1)*1440+1):min(i*1440,datalength)]
       day.boutedMVPA = boutedMVPA[((i-1)*1440+1):min(i*1440,datalength)]
       day.boutedvig = boutedvig[((i-1)*1440+1):min(i*1440,datalength)]
       day.boutedsed10 = boutedsed10[((i-1)*1440+1):min(i*1440,datalength)]
@@ -1333,14 +1334,6 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     # Minutes of valid wear time
     dayvars[i,4] = daywear
     
-    # Store each axis of counts in its own vector
-    day.counts.vert = day.counts[,1]
-    day.counts.ap = day.counts[,2]
-    day.counts.ml = day.counts[,3]
-    day.counts.sum = day.counts[,4]
-    day.counts.mag = day.counts[,5]
-    day.counts.int = day.counts[,int.axis]
-    
     # Store day.counts[day.wearflag==1] into its own matrix
     day.counts.valid = day.counts[day.wearflag==1,]
     
@@ -1357,8 +1350,16 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     
     if (brevity==2 | brevity==3) {
       
-      # Store day.counts.valid[,int.axis] into its own vector
+      # Store day.counts.valid[,int.axis] into its own matrix and each axis
       day.counts.valid.int = day.counts.valid[,int.axis]
+      
+      # Store each axis of counts in its own vector
+      day.counts.vert = day.counts[,1]
+      day.counts.ap = day.counts[,2]
+      day.counts.ml = day.counts[,3]
+      day.counts.sum = day.counts[,4]
+      day.counts.mag = day.counts[,5]
+      day.counts.int = day.counts[,int.axis]
       
       # Flag valid minutes by intensity level
       intensity = cut(x=day.counts.valid.int,breaks=c(0,int.cuts,Inf),right=FALSE,labels=1:5)
@@ -1418,7 +1419,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
         # Hourly counts/min averages
         if (daylength==1440) {
           if (hourly.axis=="vert") {
-            dayvars[i,99:122] = blockaves(x=day.counts,window=60,skipchecks=TRUE)
+            dayvars[i,99:122] = blockaves(x=day.counts.vert,window=60,skipchecks=TRUE)
           } else {
             dayvars[i,99:122] = blockaves(x=day.counts[,hourly.axis],window=60,skipchecks=TRUE)
           }
