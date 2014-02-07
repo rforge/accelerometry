@@ -149,7 +149,17 @@ Some additional information on the package accelerometry and its functions can b
 \code{\link{accel.artifacts}}, \code{\link{accel.bouts}}, \code{\link{accel.process.uni}}, \code{\link{accel.intensities}}, \code{\link{accel.sedbreaks}}, \code{\link{accel.weartime}}, \code{\link{blockaves}}, \code{\link{movingaves}}, \code{\link{rle2}}
 }
 \examples{
-NA
+# Load in sample data frame
+data(tridata)
+
+# Process data and request per-day variables
+accel.days <- accel.process.tri(counts = tridata[,1:3], steps = tridata[,4])
+
+# Process data, but for non-wear detection use triaxial vector magnitude with 90-
+# minute window and two-minute tolerance for nonzero counts up to 200
+accel.days <- accel.process.tri(counts = tridata[,1:3], steps = tridata[,4],
+                                nonwear.axis = "mag", nonwear.window = 90,
+                                nonwear.tol = 2, nonwear.tol.upper = 200)
 }
 \keyword{ accelerometry }
 \keyword{ physical activity }

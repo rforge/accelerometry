@@ -48,11 +48,11 @@ Some additional information on the package accelerometry and its functions can b
 }
 \examples{
 # Load in sample data frame
-data(testdata)
+data(unidata)
 
 # Get data from ID number 21005
-id.part1 <- testdata[testdata[,"seqn"] == 21005,"seqn"]
-counts.part1 <- testdata[testdata[,"seqn"] == 21005,"paxinten"]
+id.part1 <- unidata[unidata[,"seqn"] == 21005,"seqn"]
+counts.part1 <- unidata[unidata[,"seqn"] == 21005,"paxinten"]
 
 # Identify periods of valid wear time
 weartime.flag <- accel.weartime(counts = counts.part1)

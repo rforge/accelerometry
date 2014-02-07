@@ -1,13 +1,13 @@
-\name{testdata}
-\alias{testdata}
+\name{unidata}
+\alias{unidata}
 \docType{data}
 \title{
-Test dataset for package accelerometry
+Uniaxial sample data for package accelerometry
 }
 \description{
-This dataset is used to illustrate the various functions in the package accelerometry.
+This dataset is used to illustrate the various functions in the package accelerometry. 
 }
-\usage{data(testdata)}
+\usage{data(unidata)}
 \format{
   The format is:
  int [1:50400, 1:3] 21005 21005 21005 21005 21005 21005 21005 21005 21005 21005 ...
@@ -25,11 +25,11 @@ The data is for from five participants in NHANES 2003-2004 [1]. The full dataset
 1. Centers for Disease Control and Prevention (CDC). National Center for Health Statistics (NCHS). National Health and Nutrition Examination Survey Data. Hyattsville, MD: US Department of Health and Human Services, Centers for Disease Control and Prevention, 2003-6 \url{http://www.cdc.gov/nchs/nhanes/nhanes_questionnaires.htm}. Accessed February 1, 2014.
 }
 \examples{
-# Load in sample data frame
-data(testdata)
+# Load in sample data
+data(unidata)
 
 # Plot full week of data from ID number 21007
-counts.part3 <- testdata[testdata[,"seqn"]==21007,"paxinten"]
+counts.part3 <- unidata[unidata[,"seqn"]==21007,"paxinten"]
 plot(counts.part3)
 }
 \keyword{datasets}

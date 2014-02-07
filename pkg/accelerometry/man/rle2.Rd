@@ -40,10 +40,10 @@ Some additional information on the package accelerometry and its functions can b
 }
 \examples{
 # Load in sample data frame
-data(testdata)
+data(unidata)
 
 # Get long vector of ID numbers
-id.numbers <- testdata[,1]
+id.numbers <- unidata[,1]
 
 # Summarize runs of ID numbers
 id.summarized <- rle2(x = id.numbers)

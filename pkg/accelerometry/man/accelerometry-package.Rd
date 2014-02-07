@@ -29,6 +29,8 @@ The following functions are contained in the package accelerometry:
 \code{\link{movingaves}},
 \code{\link{rle2}}
 
+Two datasets are included for the Examples: unidata and tridata. unidata contains uniaxial data on the first five participants in NHANES 2003-2004 [2], and tridata contains seven days of triaxial data from a volunteer, provided by Ei Ei Khaing Nang from the Department of Epidemiology and Public Health, Yong Loo Lin School of Medicine,  National University of Singapore, Singapore, Republic of Singapore.
+
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}
 }
 \author{
@@ -49,12 +51,12 @@ NA
 }
 \examples{
 # Load in sample data from NHANES 2003-2004 [1]
-data(testdata)
+data(unidata)
 
 # Get data from ID number 21005
-id.part1 <- testdata[testdata[,"seqn"] == 21005,"seqn"]
-days.part1 <- testdata[testdata[,"seqn"] == 21005,"paxday"]
-counts.part1 <- testdata[testdata[,"seqn"] == 21005,"paxinten"]
+id.part1 <- unidata[unidata[,"seqn"] == 21005,"seqn"]
+days.part1 <- unidata[unidata[,"seqn"] == 21005,"paxday"]
+counts.part1 <- unidata[unidata[,"seqn"] == 21005,"paxinten"]
 
 # Identify periods of valid wear time
 weartime.flag <- accel.weartime(counts = counts.part1)
@@ -65,13 +67,6 @@ mvpa.bouts.flag <- accel.bouts(counts = counts.part1, weartime = weartime.flag,
                               
 # Obtain maximum 10-minute count average
 max.10min.movingave <- movingaves(x=counts.part1,window=10,return.max=TRUE)
-
-# Process data from ID 21005 and request per-day variables
-accel.days <- accel.process.uni(counts = counts.part1, id = id.part1)
-
-# Process data from ID 21005 and request daily averages
-accel.averages <- accel.process.uni(counts = counts.part1, id = id.part1, 
-                                    return.form = 1)
 
 # Process data from ID 21005 and request per-day variables and daily averages
 accel.list <- accel.process.uni(counts = counts.part1,  id = id.part1, return.form = 3)
@@ -84,4 +79,16 @@ accel.nci <- accel.process.uni(counts = counts.part1, id = id.part1, brevity = 2
                                active.bout.tol = 2, active.bout.nci = TRUE, 
                                artifact.thresh = 32767, artifact.action = 3, 
                                return.form = 3)
+                               
+# Load in triaxial sample data
+data(tridata)
+
+# Process data and request per-day variables
+accel.days <- accel.process.tri(counts = tridata[,1:3], steps = tridata[,4])
+
+# Process data, but for non-wear detection use triaxial vector magnitude with 90-
+# minute window and two-minute tolerance for nonzero counts up to 200
+accel.days <- accel.process.tri(counts = tridata[,1:3], steps = tridata[,4],
+                                nonwear.axis = "mag", nonwear.window = 90,
+                                nonwear.tol = 2, nonwear.tol.upper = 200)
 }

@@ -43,10 +43,10 @@ Some additional information on the package accelerometry and its functions can b
 }
 \examples{
 # Load in sample data frame
-data(testdata)
+data(unidata)
 
 # Get data from ID number 21007
-counts.part3 <- testdata[testdata[,"seqn"]==21007,"paxinten"]
+counts.part3 <- unidata[unidata[,"seqn"]==21007,"paxinten"]
 
 # Replace artifacts (defined as 10000+ counts) with average of neighboring values
 counts.part3.corrected <- accel.artifacts(counts = counts.part3, thresh = 10000)
