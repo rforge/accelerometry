@@ -709,7 +709,7 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
   numdays = ceiling(datalength/1440)
   
   # Initialize matrix to save daily physical activity variables
-  dayvars = matrix(NA,ncol=66,nrow=numdays)
+  dayvars = matrix(NA,ncol=68,nrow=numdays)
   
   # If artifact.action = 3, replace minutes with counts > artifact.thresh with average of surrounding minutes
   if (artifact.action==3) {counts = accel.artifacts(counts=counts,thresh=artifact.thresh)}
@@ -875,15 +875,26 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
       dayvars[i,39] = movingaves(x=day.counts,window=30,return.max=TRUE,skipchecks=TRUE)
       
       # MVPA and vigorous physical activity in >= 10-min bouts
-      dayvars[i,40] = sum(day.boutedMVPA)
-      dayvars[i,41] = sum(day.boutedvig)
-      dayvars[i,42] = sum(dayvars[i,40:41])
+      dayvars[i,42] = sum(day.boutedMVPA)
+      dayvars[i,43] = sum(day.boutedvig)
+      dayvars[i,44] = sum(dayvars[i,42:43])
+      
+      if (dayvars[i,42]>0) {
+        dayvars[i,40] = sum(rle2(day.boutedMVPA)[,1]==1)
+      } else {
+        dayvars[i,40] = 0
+      }
+      if (dayvars[i,43]>0) {
+        dayvars[i,41] = sum(rle2(day.boutedMVPA)[,1]==1)
+      } else {
+        dayvars[i,41] = 0
+      }
       
       if (brevity==3) {
         
         # Hourly counts/min averages
         if (daylength==1440) {
-          dayvars[i,43:66] = blockaves(x=day.counts,window=60,skipchecks=TRUE)
+          dayvars[i,45:68] = blockaves(x=day.counts,window=60,skipchecks=TRUE)
         }
         
       }
@@ -898,16 +909,17 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
                         "sed_counts","light_counts","life_counts","mod_counts","vig_counts","lightlife_counts",
                         "mvpa_counts","active_counts","sed_bouted_10min","sed_bouted_30min","sed_bouted_60min",
                         "sed_breaks","max_1min_counts","max_5min_counts","max_10min_counts","max_30min_counts",
-                        "mvpa_bouted","vig_bouted","guideline_min","cpm_hour1","cpm_hour2","cpm_hour3","cpm_hour4",
-                        "cpm_hour5","cpm_hour6","cpm_hour7","cpm_hour8","cpm_hour9","cpm_hour10","cpm_hour11",
-                        "cpm_hour12","cpm_hour13","cpm_hour14","cpm_hour15","cpm_hour16","cpm_hour17","cpm_hour18",
-                        "cpm_hour19","cpm_hour20","cpm_hour21","cpm_hour22","cpm_hour23","cpm_hour24")
+                        "num_mvpa_bouts","num_vig_bouts","mvpa_bouted","vig_bouted","guideline_min","cpm_hour1",
+                        "cpm_hour2","cpm_hour3","cpm_hour4","cpm_hour5","cpm_hour6","cpm_hour7","cpm_hour8","cpm_hour9",
+                        "cpm_hour10","cpm_hour11","cpm_hour12","cpm_hour13","cpm_hour14","cpm_hour15","cpm_hour16",
+                        "cpm_hour17","cpm_hour18","cpm_hour19","cpm_hour20","cpm_hour21","cpm_hour22","cpm_hour23",
+                        "cpm_hour24")
   
   # Drop variables according to brevity setting
   if (brevity==1) {
     dayvars = dayvars[,1:7]
   } else if (brevity==2) {
-    dayvars = dayvars[,1:42]
+    dayvars = dayvars[,1:44]
   }
   
   # Drop steps if NULL
@@ -1164,7 +1176,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
   numdays = ceiling(datalength/1440)
   
   # Initializing matrix to save daily physical activity variables
-  dayvars = matrix(NA,ncol=122,nrow=numdays)
+  dayvars = matrix(NA,ncol=124,nrow=numdays)
   
   # Calculate triaxial sum and vector magnitude and add to counts.tri
   counts.tri = cbind(counts.tri,.rowSums(X=counts.tri,m=datalength,n=3),
@@ -1300,7 +1312,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     if (currentday==8) {currentday = 1}
     
     # Load accelerometer data from day i
-    day.counts = counts.tri[((i-1)*1440+1):min(i*1440,datalength),]
+    day.counts = counts.tri[((i-1)*1440+1):min(i*1440,datalength),,drop=FALSE]
     day.wearflag = wearflag[((i-1)*1440+1):min(i*1440,datalength)]
     if (brevity==2 | brevity==3) {
       day.intvec = intvec[((i-1)*1440+1):min(i*1440,datalength)]
@@ -1372,14 +1384,14 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
       
       # Proportions of daily wear time in each intensity level
       dayvars[i,24:31] = dayvars[i,16:23]/daywear
-      dayvars[i,32:36] = apply(X=day.counts.valid[intensity==1,],MARGIN=2,FUN=sum)
-      dayvars[i,37:41] = apply(X=day.counts.valid[intensity==2,],MARGIN=2,FUN=sum)
-      dayvars[i,42:46] = apply(X=day.counts.valid[intensity==3,],MARGIN=2,FUN=sum)
-      dayvars[i,47:51] = apply(X=day.counts.valid[intensity==4,],MARGIN=2,FUN=sum)
-      dayvars[i,52:56] = apply(X=day.counts.valid[intensity==5,],MARGIN=2,FUN=sum)
-      dayvars[i,57:61] = apply(X=day.counts.valid[intensity %in% c(2,3),],MARGIN=2,FUN=sum)
-      dayvars[i,62:66] = apply(X=day.counts.valid[intensity %in% c(4,5),],MARGIN=2,FUN=sum)
-      dayvars[i,67:71] = apply(X=day.counts.valid[intensity %in% c(2,3,4,5),],MARGIN=2,FUN=sum)
+      dayvars[i,32:36] = apply(X=day.counts.valid[intensity==1,,drop=FALSE],MARGIN=2,FUN=sum)
+      dayvars[i,37:41] = apply(X=day.counts.valid[intensity==2,,drop=FALSE],MARGIN=2,FUN=sum)
+      dayvars[i,42:46] = apply(X=day.counts.valid[intensity==3,,drop=FALSE],MARGIN=2,FUN=sum)
+      dayvars[i,47:51] = apply(X=day.counts.valid[intensity==4,,drop=FALSE],MARGIN=2,FUN=sum)
+      dayvars[i,52:56] = apply(X=day.counts.valid[intensity==5,,drop=FALSE],MARGIN=2,FUN=sum)
+      dayvars[i,57:61] = apply(X=day.counts.valid[intensity %in% c(2,3),,drop=FALSE],MARGIN=2,FUN=sum)
+      dayvars[i,62:66] = apply(X=day.counts.valid[intensity %in% c(4,5),,drop=FALSE],MARGIN=2,FUN=sum)
+      dayvars[i,67:71] = apply(X=day.counts.valid[intensity %in% c(2,3,4,5),,drop=FALSE],MARGIN=2,FUN=sum)
       
       # Bouted sedentary time
       dayvars[i,72] = sum(day.boutedsed10)
@@ -1410,18 +1422,28 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
       dayvars[i,95] = movingaves(x=day.counts.mag,window=30,return.max=TRUE,skipchecks=TRUE)
       
       # MVPA and vigorous physical activity in >= 10-min bouts
-      dayvars[i,96] = sum(day.boutedMVPA)
-      dayvars[i,97] = sum(day.boutedvig)
-      dayvars[i,98] = sum(dayvars[i,64:65])
+      dayvars[i,98] = sum(day.boutedMVPA)
+      dayvars[i,99] = sum(day.boutedvig)
+      dayvars[i,100] = sum(dayvars[i,98:99])
+      if (dayvars[i,98]>0) {
+        dayvars[i,96] = sum(rle2(day.boutedMVPA)[,1]==1)
+      } else {
+        dayvars[i,96] = 0
+      }
+      if (dayvars[i,99]>0) {
+        dayvars[i,97] = sum(rle2(day.boutedvig)[,1]==1)
+      } else {
+        dayvars[i,97] = 0
+      }
       
       if (brevity==3) {
         
         # Hourly counts/min averages
         if (daylength==1440) {
           if (hourly.axis=="vert") {
-            dayvars[i,99:122] = blockaves(x=day.counts.vert,window=60,skipchecks=TRUE)
+            dayvars[i,101:124] = blockaves(x=day.counts.vert,window=60,skipchecks=TRUE)
           } else {
-            dayvars[i,99:122] = blockaves(x=day.counts[,hourly.axis],window=60,skipchecks=TRUE)
+            dayvars[i,101:124] = blockaves(x=day.counts[,hourly.axis],window=60,skipchecks=TRUE)
           }
         }
         
@@ -1451,17 +1473,17 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
                         "max_1min_mag","max_5min_vert","max_5min_ap","max_5min_ml","max_5min_sum",
                         "max_5min_mag","max_10min_vert","max_10min_ap","max_10min_ml","max_10min_sum",
                         "max_10min_mag","max_30min_vert","max_30min_ap","max_30min_ml",
-                        "max_30min_sum","max_30min_mag","mvpa_bouted","vig_bouted","guideline_min",
-                        "cpm_hour1","cpm_hour2","cpm_hour3","cpm_hour4","cpm_hour5","cpm_hour6",
-                        "cpm_hour7","cpm_hour8","cpm_hour9","cpm_hour10","cpm_hour11","cpm_hour12",
-                        "cpm_hour13","cpm_hour14","cpm_hour15","cpm_hour16","cpm_hour17","cpm_hour18",
+                        "max_30min_sum","max_30min_mag","num_mvpa_bouts","num_vig_bouts","mvpa_bouted",
+                        "vig_bouted","guideline_min","cpm_hour1","cpm_hour2","cpm_hour3","cpm_hour4",
+                        "cpm_hour5","cpm_hour6","cpm_hour7","cpm_hour8","cpm_hour9","cpm_hour10","cpm_hour11",
+                        "cpm_hour12","cpm_hour13","cpm_hour14","cpm_hour15","cpm_hour16","cpm_hour17","cpm_hour18",
                         "cpm_hour19","cpm_hour20","cpm_hour21","cpm_hour22","cpm_hour23","cpm_hour24")
   
   # Drop variables according to brevity setting
   if (brevity==1) {
     dayvars = dayvars[,1:15,drop=FALSE]
   } else if (brevity==2) {
-    dayvars = dayvars[,1:98,drop=FALSE]
+    dayvars = dayvars[,1:100,drop=FALSE]
   }
   
   # Drop steps if NULL

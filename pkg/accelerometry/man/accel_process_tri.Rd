@@ -153,13 +153,13 @@ Some additional information on the package accelerometry and its functions can b
 data(tridata)
 
 # Process data and request per-day variables
-accel.days <- accel.process.tri(counts = tridata[,1:3], steps = tridata[,4])
+accel.days1 <- accel.process.tri(counts = tridata[,1:3], steps = tridata[,4])
 
 # Process data, but for non-wear detection use triaxial vector magnitude with 90-
 # minute window and two-minute tolerance for nonzero counts up to 200
-accel.days <- accel.process.tri(counts = tridata[,1:3], steps = tridata[,4],
-                                nonwear.axis = "mag", nonwear.window = 90,
-                                nonwear.tol = 2, nonwear.tol.upper = 200)
+accel.days2 <- accel.process.tri(counts = tridata[,1:3], steps = tridata[,4],
+                                 nonwear.axis = "mag", nonwear.window = 90,
+                                 nonwear.tol = 2, nonwear.tol.upper = 200)
 }
 \keyword{ accelerometry }
 \keyword{ physical activity }
