@@ -1347,7 +1347,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     dayvars[i,4] = daywear
     
     # Store day.counts[day.wearflag==1] into its own matrix
-    day.counts.valid = day.counts[day.wearflag==1,]
+    day.counts.valid = day.counts[day.wearflag==1,,drop=FALSE]
     
     # Total counts during wear time in each axis
     dayvars[i,5:9] = .colSums(X=day.counts.valid, m=daywear, n=5)
