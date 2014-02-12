@@ -522,14 +522,16 @@ rle2 <- function(x) {
   
 }
 
-accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1/5"), id = NULL, 
-                              brevity = 1, valid.days = 1, valid.week.days = 0, valid.weekend.days = 0, 
-                              int.cuts = c(100,760,2020,5999), cpm.nci = FALSE, days.distinct = FALSE, 
-                              nonwear.window = 60, nonwear.tol = 0, nonwear.tol.upper = 99, 
-                              nonwear.nci = FALSE, weartime.minimum = 600, weartime.maximum = 1440, 
-                              use.partialdays = FALSE, active.bout.length = 10, active.bout.tol = 0, 
-                              mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, active.bout.nci = FALSE, 
-                              sed.bout.tol = 0, sed.bout.tol.maximum = int.cuts[2]-1, artifact.thresh = 25000, 
+accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1/5"), 
+                              start.time = "00:00:00", id = NULL, brevity = 1, valid.days = 1, 
+                              valid.week.days = 0, valid.weekend.days = 0, 
+                              int.cuts = c(100,760,2020,5999), cpm.nci = FALSE, 
+                              days.distinct = FALSE, nonwear.window = 60, nonwear.tol = 0, 
+                              nonwear.tol.upper = 99, nonwear.nci = FALSE, weartime.minimum = 600, 
+                              weartime.maximum = 1440, use.partialdays = FALSE, 
+                              active.bout.length = 10, active.bout.tol = 0, mvpa.bout.tol.lower = 0, 
+                              vig.bout.tol.lower = 0, active.bout.nci = FALSE, sed.bout.tol = 0, 
+                              sed.bout.tol.maximum = int.cuts[2]-1, artifact.thresh = 25000, 
                               artifact.action = 1, weekday.weekend = FALSE, return.form = 2) {
     
   # If counts is a character, output error
@@ -575,6 +577,12 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
   # If start.date is not a date, output error
   if (class(start.date)!="Date") {
     stop("For start.date= option, please enter a valid date variable")
+  }
+  
+  # If start.time is not a character, output error
+  if (!is.character(start.time)) {
+    stop("For start.time= option, please enter the start time for the first day of monitoring. 
+         For example,'08:30:00' for 8:30 a.m.")
   }
   
   # If more than one id, output error
@@ -697,6 +705,18 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
   # If return.form is out of range, output error
   if (!return.form %in% c(1,2,3)) {
     stop("For return.form= option, please enter 1 for per-person, 2 for per-day, or 3 for both")
+  }
+  
+  # If start time is not 00:00:00, drop the data corresponding to the first partial day
+  if (start.time!="00:00:00") {
+    extratime = round(as.numeric(difftime(as.POSIXct(paste(start.date,"24:00:00")),as.POSIXct(paste(start.date,start.time))), units="mins"))
+    if (extratime<1440) {
+      counts = counts[(extratime+1):length(counts)]
+      start.date = start.date + 1
+      if (!is.null(steps)) {
+        steps = steps[(extratime+1):length(steps)]
+      }
+    }
   }
   
   # Get number of minutes of data
@@ -978,16 +998,19 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
 }
 
 
-accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("2014/1/5"), id = NULL, brevity = 1, 
-                              valid.days = 1, valid.week.days = 0, valid.weekend.days = 0, int.axis = "vert",
-                              int.cuts = c(100,760,2020,5999), cpm.nci = FALSE, hourly.axis = "vert",
-                              days.distinct = FALSE, nonwear.axis = "vert", nonwear.window = 60, nonwear.tol = 0, 
-                              nonwear.tol.upper = 99, nonwear.nci = FALSE, weartime.minimum = 600, 
-                              weartime.maximum = 1440, use.partialdays = FALSE, active.bout.length = 10, 
-                              active.bout.tol = 0, mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, 
-                              active.bout.nci = FALSE, sed.bout.tol = 0, sed.bout.tol.maximum = int.cuts[2]-1, 
-                              artifact.axis = "vert", artifact.thresh = 25000, artifact.action = 1, 
-                              weekday.weekend = FALSE, return.form = 2) {
+accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("2014/1/5"), 
+                              start.time = "00:00:00", id = NULL, brevity = 1, valid.days = 1, 
+                              valid.week.days = 0, valid.weekend.days = 0, int.axis = "vert",
+                              int.cuts = c(100,760,2020,5999), cpm.nci = FALSE, 
+                              hourly.axis = "vert",days.distinct = FALSE, nonwear.axis = "vert", 
+                              nonwear.window = 60, nonwear.tol = 0, nonwear.tol.upper = 99, 
+                              nonwear.nci = FALSE, weartime.minimum = 600, weartime.maximum = 1440, 
+                              use.partialdays = FALSE, active.bout.length = 10, active.bout.tol = 0, 
+                              mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, 
+                              active.bout.nci = FALSE, sed.bout.tol = 0, 
+                              sed.bout.tol.maximum = int.cuts[2]-1, artifact.axis = "vert", 
+                              artifact.thresh = 25000, artifact.action = 1, weekday.weekend = FALSE, 
+                              return.form = 2) {
   
   # If counts variable is a character, output error
   if (is.character(counts.tri)) {
@@ -1027,6 +1050,12 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
   # If start.date is not a date, output error
   if (class(start.date)!="Date") {
     stop("For start.date= option, please enter a valid date variable")
+  }
+  
+  # If start.time is not a character, output error
+  if (!is.character(start.time)) {
+    stop("For start.time= option, please enter the start time for the first day of monitoring. 
+         For example,'08:30:00' for 8:30 a.m.")
   }
   
   # If more than one id, output error
@@ -1164,6 +1193,18 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
   # If return.form is out of range, output error
   if (!return.form %in% c(1,2,3)) {
     stop("For return.form= option, please enter 1 for per-person, 2 for per-day, or 3 for both")
+  }
+  
+  # If start time is not 00:00:00, drop the data corresponding to the first partial day
+  if (start.time!="00:00:00") {
+    extratime = round(as.numeric(difftime(as.POSIXct(paste(start.date,"24:00:00")),as.POSIXct(paste(start.date,start.time))), units="mins"))
+    if (extratime<1440) {
+      counts.tri = counts.tri[(extratime+1):nrow(counts.tri),]
+      start.date = start.date + 1
+      if (!is.null(steps)) {
+        steps = steps[(extratime+1):length(steps)]
+      }
+    }
   }
   
   # Get number of minutes of data
@@ -1498,7 +1539,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
   
   # If weekday.weekend is FALSE, just calculate overall averages
   if (weekday.weekend==FALSE) {
-    averages = c(id=id,valid_days=length(locs.valid),include=0,colMeans(x=dayvars[locs.valid,4:ncol(dayvars)]))
+    averages = c(id=id,valid_days=length(locs.valid),include=0,colMeans(x=dayvars[locs.valid,4:ncol(dayvars),drop=FALSE]))
     if (length(locs.valid)>=valid.days & length(locs.valid.wk)>=valid.week.days & length(locs.valid.we)>=valid.weekend.days) {
       averages[3] = 1
     }
@@ -1507,9 +1548,9 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     # Otherwise calculate averages by all valid days and by valid weekdays and valid weekend days
     averages = c(id=id,valid_days=length(locs.valid),valid_week_days=length(locs.valid.wk),
                  valid_weekend_days=length(locs.valid.we), include=0,
-                 colMeans(x=dayvars[locs.valid,4:ncol(dayvars)]),
-                 colMeans(x=dayvars[locs.valid.wk,4:ncol(dayvars)]),
-                 colMeans(x=dayvars[locs.valid.we,4:ncol(dayvars)]))
+                 colMeans(x=dayvars[locs.valid,4:ncol(dayvars),drop=FALSE]),
+                 colMeans(x=dayvars[locs.valid.wk,4:ncol(dayvars),drop=FALSE]),
+                 colMeans(x=dayvars[locs.valid.we,4:ncol(dayvars),drop=FALSE]))
     if (length(locs.valid)>=valid.days & length(locs.valid.wk)>=valid.week.days & length(locs.valid.we)>=valid.weekend.days) {
       averages[5] = 1
     }

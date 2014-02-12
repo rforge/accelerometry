@@ -7,9 +7,9 @@ Process triaxial minute-to-minute accelerometer data
 This function calculates a variety of physical activity variables based on triaxial minute-to-minute accelerometer data for individual participants. A data dictionary for the variables returned is available on the author's website, \url{https://sites.google.com/site/danevandomelen/}.
 }
 \usage{
-accel.process.tri(counts.tri, steps = NULL, start.date = as.Date("2014/1/5"), id = NULL, 
-                  brevity = 1, valid.days = 1, valid.week.days = 0, 
-                  valid.weekend.days = 0, int.axis = "vert", 
+accel.process.tri(counts.tri, steps = NULL, start.date = as.Date("2014/1/5"), 
+                  start.time = "00:00:00", id = NULL, brevity = 1, valid.days = 1, 
+                  valid.week.days = 0, valid.weekend.days = 0, int.axis = "vert", 
                   int.cuts = c(100, 760, 2020, 5999), cpm.nci = FALSE, 
                   hourly.axis = "vert", days.distinct = FALSE, nonwear.axis = "vert", 
                   nonwear.window = 60, nonwear.tol = 0, nonwear.tol.upper = 99, 
@@ -30,6 +30,9 @@ Steps vector; must be same length as counts.tri (if specified).
 }
   \item{start.date}{
 Date of first day of monitoring (must be of class 'date'). Only used to extract day of week, so if day of week is known but date is not, user can enter any date that corresponds to that day of the week. The default date corresonds to the first Sunday in January 2014. 
+}
+  \item{start.time}{
+Optional character vector indicating the start time for monitoring. If not specified it is assumed to be 00:00:00, i.e. the first second of the first day. If not 00:00:00, the first partial day is dropped.
 }
   \item{id}{
 Either a single value or a vector indicating the ID number for the participant whose accelerometer data was entered.
