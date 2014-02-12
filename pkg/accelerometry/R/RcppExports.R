@@ -555,11 +555,6 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
     stop("For counts= option, please ensure that all values of object are non-negative")
   }
   
-  # If length of counts is less than 1440, output error
-  if (length(counts)<1440) {
-    stop("For counts= option, please ensure there is at least 1 full day of data (1440 data points)")
-  }
-  
   # If steps is a data frame or matrix, convert to vector
   if (is.data.frame(steps)) {steps = as.vector(as.matrix(steps))}
   if (is.matrix(steps)) {steps = as.vector(steps)}
@@ -1026,11 +1021,6 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
   # If any count values are less than 0, output error
   if (sum(counts.tri<0)>0) {
     stop("For counts.tri= option, please ensure that all count values are non-negative")
-  }
-  
-  # If length of counts.tri is less than 1440, output error
-  if (nrow(counts.tri)<1440) {
-    stop("For counts.tri= option, please ensure there is at least 1 full day of data (1440 minutes)")
   }
   
   # If steps is a data frame or matrix, convert to vector
