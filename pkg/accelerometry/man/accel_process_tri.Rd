@@ -32,7 +32,7 @@ Steps vector; must be same length as counts.tri (if specified).
 Date of first day of monitoring (must be of class 'date'). Only used to extract day of week, so if day of week is known but date is not, user can enter any date that corresponds to that day of the week. The default date corresonds to the first Sunday in January 2014. 
 }
   \item{start.time}{
-Optional character vector indicating the start time for monitoring. If not specified it is assumed to be 00:00:00, i.e. the first second of the first day. If not 00:00:00, the first partial day is dropped.
+Optional character vector indicating the start time for monitoring. If not specified it is assumed to be 00:00:00, i.e. the very beginning of the first day.
 }
   \item{id}{
 Either a single value or a vector indicating the ID number for the participant whose accelerometer data was entered.
