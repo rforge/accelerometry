@@ -717,11 +717,25 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
   # Get number of minutes of data
   datalength = length(counts)
   
+  # create daymat matrix with start and end times for each day
+  if (start.time=="24:00:00") {
+    start.time = "00:00:00"
+    start.date = start.date + 1
+  }
+  extratime = round(as.numeric(difftime(as.POSIXct(paste(start.date,"24:00:00")),as.POSIXct(paste(start.date,start.time)), units="mins")))
+  startmins = 1
+  stopmins = min(extratime,datalength)
+  if (stopmins<datalength) {
+    startmins = c(startmins,seq(stopmins+1,datalength,1440))
+    stopmins = c(stopmins,startmins[2:length(startmins)]+1439)
+    stopmins[length(stopmins)] = datalength
+  }
+  
   # If id value or vector is provided, get first value
   if (is.null(id)) {id = 1} else {id = id[1]}
   
   # Calculate number of full days of data
-  numdays = ceiling(datalength/1440)
+  numdays = length(startmins)
   
   # Initialize matrix to save daily physical activity variables
   dayvars = matrix(NA,ncol=68,nrow=numdays)
@@ -816,16 +830,16 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
     if (currentday==8) {currentday = 1}
     
     # Load accelerometer data from day i    
-    day.counts = counts[((i-1)*1440+1):min(i*1440,datalength)]
-    day.wearflag = wearflag[((i-1)*1440+1):min(i*1440,datalength)]
+    day.counts = counts[startmins[i]:stopmins[i]]
+    day.wearflag = wearflag[startmins[i]:stopmins[i]]
     if (brevity==2 | brevity==3) {
-      day.boutedMVPA = boutedMVPA[((i-1)*1440+1):min(i*1440,datalength)]
-      day.boutedvig = boutedvig[((i-1)*1440+1):min(i*1440,datalength)]
-      day.boutedsed10 = boutedsed10[((i-1)*1440+1):min(i*1440,datalength)]
-      day.boutedsed30 = boutedsed30[((i-1)*1440+1):min(i*1440,datalength)]
-      day.boutedsed60 = boutedsed60[((i-1)*1440+1):min(i*1440,datalength)]
+      day.boutedMVPA = boutedMVPA[startmins[i]:stopmins[i]]
+      day.boutedvig = boutedvig[startmins[i]:stopmins[i]]
+      day.boutedsed10 = boutedsed10[startmins[i]:stopmins[i]]
+      day.boutedsed30 = boutedsed30[startmins[i]:stopmins[i]]
+      day.boutedsed60 = boutedsed60[startmins[i]:stopmins[i]]
     }
-    if (!is.null(steps)) {day.steps = steps[((i-1)*1440+1):min(i*1440,datalength)]}
+    if (!is.null(steps)) {day.steps = steps[startmins[i]:stopmins[i]]}
     
     # Calculate constants that are used more than once
     daywear = sum(day.wearflag)
@@ -949,7 +963,7 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
   
   # If weekday.weekend is FALSE, just calculate overall averages
   if (weekday.weekend==FALSE) {
-    averages = c(id=id,valid_days=length(locs.valid),include=0,colMeans(x=dayvars[locs.valid,4:ncol(dayvars)]))
+    averages = c(id=id,valid_days=length(locs.valid),include=0,colMeans(x=dayvars[locs.valid,4:ncol(dayvars),drop=FALSE]))
     if (length(locs.valid)>=valid.days & length(locs.valid.wk)>=valid.week.days & length(locs.valid.we)>=valid.weekend.days) {
       averages[3] = 1
     }
@@ -1185,26 +1199,28 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     stop("For return.form= option, please enter 1 for per-person, 2 for per-day, or 3 for both")
   }
   
-  # If start time is not 00:00:00, drop the data corresponding to the first partial day
-  if (start.time!="00:00:00") {
-    extratime = round(as.numeric(difftime(as.POSIXct(paste(start.date,"24:00:00")),as.POSIXct(paste(start.date,start.time))), units="mins"))
-    if (extratime<1440) {
-      counts.tri = counts.tri[(extratime+1):nrow(counts.tri),]
-      start.date = start.date + 1
-      if (!is.null(steps)) {
-        steps = steps[(extratime+1):length(steps)]
-      }
-    }
-  }
-  
   # Get number of minutes of data
   datalength = nrow(counts.tri)
+  
+  # create daymat matrix with start and end times for each day
+  if (start.time=="24:00:00") {
+    start.time = "00:00:00"
+    start.date = start.date + 1
+  }
+  extratime = round(as.numeric(difftime(as.POSIXct(paste(start.date,"24:00:00")),as.POSIXct(paste(start.date,start.time)), units="mins")))
+  startmins = 1
+  stopmins = min(extratime,datalength)
+  if (stopmins<datalength) {
+    startmins = c(startmins,seq(stopmins+1,datalength,1440))
+    stopmins = c(stopmins,startmins[2:length(startmins)]+1439)
+    stopmins[length(stopmins)] = datalength
+  }
   
   # If id value or vector is provided, get first value
   if (is.null(id)) {id = 1} else {id = id[1]}
   
   # Calculate number of full days of data
-  numdays = ceiling(datalength/1440)
+  numdays = length(startmins)
   
   # Initializing matrix to save daily physical activity variables
   dayvars = matrix(NA,ncol=124,nrow=numdays)
@@ -1343,17 +1359,17 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     if (currentday==8) {currentday = 1}
     
     # Load accelerometer data from day i
-    day.counts = counts.tri[((i-1)*1440+1):min(i*1440,datalength),,drop=FALSE]
-    day.wearflag = wearflag[((i-1)*1440+1):min(i*1440,datalength)]
+    day.counts = counts.tri[startmins[i]:stopmins[i],,drop=FALSE]
+    day.wearflag = wearflag[startmins[i]:stopmins[i]]
     if (brevity==2 | brevity==3) {
-      day.intvec = intvec[((i-1)*1440+1):min(i*1440,datalength)]
-      day.boutedMVPA = boutedMVPA[((i-1)*1440+1):min(i*1440,datalength)]
-      day.boutedvig = boutedvig[((i-1)*1440+1):min(i*1440,datalength)]
-      day.boutedsed10 = boutedsed10[((i-1)*1440+1):min(i*1440,datalength)]
-      day.boutedsed30 = boutedsed30[((i-1)*1440+1):min(i*1440,datalength)]
-      day.boutedsed60 = boutedsed60[((i-1)*1440+1):min(i*1440,datalength)]
+      day.intvec = intvec[startmins[i]:stopmins[i]]
+      day.boutedMVPA = boutedMVPA[startmins[i]:stopmins[i]]
+      day.boutedvig = boutedvig[startmins[i]:stopmins[i]]
+      day.boutedsed10 = boutedsed10[startmins[i]:stopmins[i]]
+      day.boutedsed30 = boutedsed30[startmins[i]:stopmins[i]]
+      day.boutedsed60 = boutedsed60[startmins[i]:stopmins[i]]
     }
-    if (!is.null(steps)) {day.steps = steps[((i-1)*1440+1):min(i*1440,datalength)]}
+    if (!is.null(steps)) {day.steps = steps[startmins[i]:stopmins[i]]}
     
     # Calculate constants that are used more than once
     daywear = sum(day.wearflag)
