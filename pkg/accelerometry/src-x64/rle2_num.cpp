@@ -37,7 +37,7 @@ NumericMatrix rle2_num(NumericVector x, int nmax) {
       }
       else {
         out(counter,2) = n-1;
-        out(counter,3) = 1;
+        out(counter,3) = out(counter,2)-out(counter,1)+1;
         counter += 1;
         out(counter,0) = x(n-1);
         out(counter,1) = n;
