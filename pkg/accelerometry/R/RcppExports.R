@@ -417,21 +417,26 @@ personvars <- function(dayvars, rows, days, wk, we) {
   .Call('accelerometry_personvars', PACKAGE = 'accelerometry', dayvars, rows, days, wk, we)
 }
 
-rle2.num <- function(x, nmax) {
-  .Call('accelerometry_rle2_num', PACKAGE = 'accelerometry', x, nmax)
+rle2.num <- function(x, n, nmax) {
+  .Call('accelerometry_rle2_num', PACKAGE = 'accelerometry', x, n, nmax)
 }
 
-rle2.char <- function(x, nmax) {
-  .Call('accelerometry_rle2_char', PACKAGE = 'accelerometry', x, nmax)
+rle2.char <- function(x, n, nmax) {
+  .Call('accelerometry_rle2_char', PACKAGE = 'accelerometry', x, n, nmax)
 }
 
-rle2 <- function(x) {
+rle2 <- function(x, rle.form = FALSE) {
   
   # If x is a matrix or data frame and has multiple columns, output error
   if (is.matrix(x) | is.data.frame(x)) {
     if (ncol(x)>1) {
       stop("For x= option, please enter vector or single-column matrix or data frame (can be numeric or character)")
     }
+  }
+  
+  # If rle.form is not a logical, output error
+  if (!is.logical(rle.form)) {
+    stop("For rle.form= option, please enter TRUE or FALSE")
   }
   
   # Get class of x and output error if not numeric or character
@@ -449,9 +454,9 @@ rle2 <- function(x) {
   # If length is 10k or less, use simplest version of algorithm
   if (length_x<=10000) {
     if (class_x==1) {
-      out = rle2.num(x=x, nmax=-1)
+      out = rle2.num(x=x, n=length_x, nmax=-1)
     } else {
-      out = rle2.char(x=x, nmax=-1)
+      out = rle2.char(x=x, n=length_x, nmax=-1)
     }
   }
   
@@ -463,9 +468,9 @@ rle2 <- function(x) {
     
     # Send first 0.1% of x to C++ function
     if (class_x==1) {
-      partial = rle2.num(x=x[1:end_partial], nmax=-1)
+      partial = rle2.num(x=x[1:end_partial], n=length_x, nmax=-1)
     } else {
-      partial = rle2.char(x=x[1:end_partial], nmax=-1)
+      partial = rle2.char(x=x[1:end_partial], n=length_x, nmax=-1)
     }
     
     # Calculate number of rows in out_partial
@@ -475,9 +480,9 @@ rle2 <- function(x) {
     if (rows/end_partial>0.5) {
       
       if (class_x==1) {
-        out = rle2.num(x=x, nmax=-1)
+        out = rle2.num(x=x, n=length_x, nmax=-1)
       } else {
-        out = rle2.char(x=x, nmax=-1)
+        out = rle2.char(x=x, n=length_x, nmax=-1)
       }
       
     }
@@ -492,9 +497,9 @@ rle2 <- function(x) {
       repeat {
         
         if (class_x==1) {
-          out = rle2.num(x=x, nmax=nmax)
+          out = rle2.num(x=x, n=length_x, nmax=nmax)
         } else {
-          out = rle2.char(x=x, nmax=nmax)
+          out = rle2.char(x=x, n=length_x, nmax=nmax)
         }
         
         if (nrow(out)<nmax) {
@@ -518,7 +523,29 @@ rle2 <- function(x) {
   # Add column names
   colnames(out) = c("value","start","stop","length")
   
+  # If rle.form is TRUE, create list to return as done by rle function
+  if (rle.form==TRUE) {
+    out = list(lengths = out[,4], values = out[,1])
+  }
+  
   return(out)
+  
+}
+
+inverse.rle2 <- function(x) {
+  
+  # Convert x to list if necessary
+  if (!is.list(x)) {
+    x.list = list(lengths = x[,4], values = x[,1])
+  } else {
+    x.list = x
+  }
+  
+  # Re-construct original vector using rle
+  y = inverse.rle(x.list)
+  
+  # Return original vector
+  return(y)
   
 }
 

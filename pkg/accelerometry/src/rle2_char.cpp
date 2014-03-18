@@ -2,8 +2,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-CharacterMatrix rle2_char(CharacterVector x, int nmax) {
-  int n = x.size();
+CharacterMatrix rle2_char(CharacterVector x, int n, int nmax) {
       
   if (nmax==-1) {
 

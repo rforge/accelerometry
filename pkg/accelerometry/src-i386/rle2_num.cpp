@@ -2,8 +2,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-NumericMatrix rle2_num(NumericVector x, int nmax) {
-  int n = x.size();
+NumericMatrix rle2_num(NumericVector x, int n, int nmax) {
               
   if (nmax==-1) {
 

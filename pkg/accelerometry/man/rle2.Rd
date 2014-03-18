@@ -7,12 +7,15 @@ Run length encoding (alternate implementation)
 Summarize vector of numeric or character values containing "runs" of repeated values. This function is very similar to the base function rle, but sometimes much faster, and different in that it returns the start/end indices for each run in addition to the run length.
 }
 \usage{
-rle2(x)
+rle2(x, rle.form = FALSE)
 }
 \arguments{
   \item{x}{
 Input vector containing either numeric or character data.
 }
+  \item{rle.form}{
+If TRUE, function returns 2-element list of run lengths and values, similar to the base R function rle. 
+  }
 }
 \details{
 NA
@@ -36,7 +39,7 @@ For character data, rle2 is often slower than rle, sometimes by an order of magn
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}
 }
 \seealso{
-\code{\link{rle}}
+\code{\link{inverse.rle2}}
 }
 \examples{
 # Load in sample data frame
