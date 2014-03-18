@@ -14,8 +14,8 @@ rle2(x, rle.form = FALSE)
 Input vector containing either numeric or character data.
 }
   \item{rle.form}{
-If TRUE, function returns 2-element list of run lengths and values, similar to the base R function rle. 
-  }
+If TRUE, function returns 2-element list of run lengths and values, similar to the base R function rle. If FALSE, function returns 4-column matrix or data frame with value, start position, end position, and length for each run.
+}
 }
 \details{
 NA
@@ -39,7 +39,7 @@ For character data, rle2 is often slower than rle, sometimes by an order of magn
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}
 }
 \seealso{
-\code{\link{inverse.rle2}}
+\code{\link{inverse.rle2}}, \code{\link{rle}}, \code{\link{inverse.rle}}
 }
 \examples{
 # Load in sample data frame
@@ -49,7 +49,7 @@ data(unidata)
 id.numbers <- unidata[,1]
 
 # Summarize runs of ID numbers
-# id.summarized <- rle2(x = id.numbers)
+id.summarized <- rle2(x = id.numbers)
 }
 \keyword{ accelerometry }
 \keyword{ rle }

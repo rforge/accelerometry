@@ -468,9 +468,9 @@ rle2 <- function(x, rle.form = FALSE) {
     
     # Send first 0.1% of x to C++ function
     if (class_x==1) {
-      partial = rle2.num(x=x[1:end_partial], n=length_x, nmax=-1)
+      partial = rle2.num(x=x[1:end_partial], n=end_partial, nmax=-1)
     } else {
-      partial = rle2.char(x=x[1:end_partial], n=length_x, nmax=-1)
+      partial = rle2.char(x=x[1:end_partial], n=end_partial, nmax=-1)
     }
     
     # Calculate number of rows in out_partial
