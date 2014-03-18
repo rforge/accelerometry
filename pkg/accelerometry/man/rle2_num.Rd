@@ -7,11 +7,14 @@ C++ function for rle2 (numeric)
 This function is called by rle2 to identify runs of repeated numeric values. Not intended for direct use.
 }
 \usage{
-rle2.num(x, nmax)
+rle2.num(x, n, nmax)
 }
 \arguments{
   \item{x}{
 Input vector containing numeric data.
+}
+  \item{n}{
+Length of x.
 }
   \item{nmax}{
 Maximum number of distinct runs.

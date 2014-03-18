@@ -7,11 +7,14 @@ C++ function for rle2 (character)
 This function is called by rle2 to identify runs of repeated numeric values. Not intended for direct use.
 }
 \usage{
-rle2.char(x, nmax)
+rle2.char(x, n, nmax)
 }
 \arguments{
   \item{x}{
 Input vector containing character data.
+}
+  \item{n}{
+Length of x.
 }
   \item{nmax}{
 Maximum number of distinct runs.

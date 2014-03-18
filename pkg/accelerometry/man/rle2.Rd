@@ -49,7 +49,7 @@ data(unidata)
 id.numbers <- unidata[,1]
 
 # Summarize runs of ID numbers
-id.summarized <- rle2(x = id.numbers)
+# id.summarized <- rle2(x = id.numbers)
 }
 \keyword{ accelerometry }
 \keyword{ rle }
