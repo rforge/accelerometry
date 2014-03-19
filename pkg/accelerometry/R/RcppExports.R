@@ -557,7 +557,7 @@ rle2 <- function(x, indices = FALSE, return.list = FALSE) {
 inverse.rle2 <- function(x) {
   
   # Convert x to list if necessary
-  if (!is.list(x)) {
+  if (class(x) %in% c("data.frame","matrix")) {
     
     colx = ncol(x)
     if (colx==2) {
