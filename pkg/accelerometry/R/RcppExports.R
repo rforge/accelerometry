@@ -535,7 +535,7 @@ rle2 <- function(x, indices = FALSE, return.list = FALSE) {
   }
   
   # Add column names
-  if (indices==0 {
+  if (indices==0) {
     colnames(out) = c("value","length")
   } else {
     colnames(out) = c("value","start","stop","length")
