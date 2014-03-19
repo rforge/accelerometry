@@ -156,7 +156,7 @@ BEGIN_RCPP
         CharacterVector x = Rcpp::as<CharacterVector >(xSEXP);
         int n = Rcpp::as<int >(nSEXP);
         int nmax = Rcpp::as<int >(nmaxSEXP);
-        int indices = Rcpp:as<int >(indicesSEXP);
+        int indices = Rcpp::as<int >(indicesSEXP);
         CharacterMatrix __result = rle2_char(x, n, nmax, indices);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
