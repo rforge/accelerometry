@@ -129,8 +129,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // rle2_num
-NumericMatrix rle2_num(NumericVector x, int n, int nmax);
-RcppExport SEXP accelerometry_rle2_num(SEXP xSEXP, SEXP nSEXP, SEXP nmaxSEXP) {
+NumericMatrix rle2_num(NumericVector x, int n, int nmax, int indices);
+RcppExport SEXP accelerometry_rle2_num(SEXP xSEXP, SEXP nSEXP, SEXP nmaxSEXP, SEXP indicesSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -138,7 +138,8 @@ BEGIN_RCPP
         NumericVector x = Rcpp::as<NumericVector >(xSEXP);
         int n = Rcpp::as<int >(nSEXP);
         int nmax = Rcpp::as<int >(nmaxSEXP);
-        NumericMatrix __result = rle2_num(x, n, nmax);
+        int indices = Rcpp::as<int >(indicesSEXP);
+        NumericMatrix __result = rle2_num(x, n, nmax, indices);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
@@ -146,8 +147,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // rle2_char
-CharacterMatrix rle2_char(CharacterVector x, int n, int nmax);
-RcppExport SEXP accelerometry_rle2_char(SEXP xSEXP, SEXP nSEXP, SEXP nmaxSEXP) {
+CharacterMatrix rle2_char(CharacterVector x, int n, int nmax, int indices);
+RcppExport SEXP accelerometry_rle2_char(SEXP xSEXP, SEXP nSEXP, SEXP nmaxSEXP, SEXP indicesSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -155,7 +156,8 @@ BEGIN_RCPP
         CharacterVector x = Rcpp::as<CharacterVector >(xSEXP);
         int n = Rcpp::as<int >(nSEXP);
         int nmax = Rcpp::as<int >(nmaxSEXP);
-        CharacterMatrix __result = rle2_char(x, n, nmax);
+        int indices = Rcpp:as<int >(indicesSEXP);
+        CharacterMatrix __result = rle2_char(x, n, nmax, indices);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

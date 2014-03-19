@@ -4,26 +4,27 @@
 Run length encoding (alternate implementation)
 }
 \description{
-Summarize vector of numeric or character values containing "runs" of repeated values. This function is very similar to the base function rle, but sometimes much faster, and different in that it returns the start/end indices for each run in addition to the run length.
+Summarize vector of numeric or character values containing runs of repeated values. This function is very similar to the base function rle, but sometimes much faster, and different in that it has an option to return the start/end indices for each run.
 }
 \usage{
-rle2(x, rle.form = FALSE)
+rle2(x, indices = FALSE, return.list = FALSE)
 }
 \arguments{
   \item{x}{
 Input vector containing either numeric or character data.
 }
-  \item{rle.form}{
-If TRUE, function returns 2-element list of run lengths and values, similar to the base R function rle. If FALSE, function returns 4-column matrix or data frame with value, start position, end position, and length for each run.
+  \item{indices}{
+If FALSE, function records value and length for each run; if TRUE, function records value, start position, stop position, and length for each run.
+}
+  \item{return.list}{
+If FALSE, function returns 2- or 4-column matrix if x is a numeric vector and 2- or 4- column data frame if x is a character vector (number of columns depends on value for indices); if TRUE, function returns 2- or 4-element list, similar to the object returned by the base R function rle.
 }
 }
 \details{
 NA
 }
 \value{
-The function returns a 4-column object, where each row contains information on a particular "run" of repeated values. The columns are value, start index, end index, run length.
-
-A matrix is returned if the input vector contains numeric data, and a data frame if it contains character data.
+Depending on the inputs indices and return.list, a matrix or data frame with 2 or 4 columns, or a list of either 2 or 4 vectors.
 }
 \references{
 Acknowledgment: This material is based upon work supported by the National Science Foundation Graduate Research Fellowship under Grant No. DGE-0940903.
@@ -49,7 +50,7 @@ data(unidata)
 id.numbers <- unidata[,1]
 
 # Summarize runs of ID numbers
-id.summarized <- rle2(x = id.numbers)
+id.summarized <- rle2(x = id.numbers, indices = TRUE)
 }
 \keyword{ accelerometry }
 \keyword{ rle }
