@@ -14,7 +14,7 @@ rle2(x, indices = FALSE, return.list = FALSE)
 Input vector containing either numeric or character data.
 }
   \item{indices}{
-If FALSE, function records value and length for each run; if TRUE, function records value, start position, stop position, and length for each run.
+If FALSE, function records values and lengths for each run; if TRUE, function records values, start positions, stop positions, and lengths for each run.
 }
   \item{return.list}{
 If FALSE, function returns 2- or 4-column matrix if x is a numeric vector and 2- or 4- column data frame if x is a character vector (number of columns depends on value for indices); if TRUE, function returns 2- or 4-element list, similar to the object returned by the base R function rle.
@@ -43,14 +43,14 @@ Some additional information on the package accelerometry and its functions can b
 \code{\link{inverse.rle2}}, \code{\link{rle}}, \code{\link{inverse.rle}}
 }
 \examples{
-# Load in sample data frame
-data(unidata)
+# Create dummie vector x
+x = c(0,0,0,-1,-1,10,10,4,6,6)
 
-# Get long vector of ID numbers
-id.numbers <- unidata[,1]
+# Summarize x using rle2
+x.summarized = rle2(x)
 
-# Summarize runs of ID numbers
-id.summarized <- rle2(x = id.numbers, indices = TRUE)
+# Repeat, but also record start/stop indices for each run
+x.summarized = rle2(x = x, indices = TRUE)
 }
 \keyword{ accelerometry }
 \keyword{ rle }
