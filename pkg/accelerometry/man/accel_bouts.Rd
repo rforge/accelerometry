@@ -55,7 +55,7 @@ If nci is set to TRUE, activity bouts are classified according to the algorithm 
 Integer vector of same length as counts and weartime, with 1's indicating minutes that are part of an activity bout, and 0's indicating minutes that are not part of an activity bout.
 }
 \references{
-1. National Cancer Institute. Risk factor monitoring and methods: SAS programs for analyzing NHANES 2003-2004 accelerometer data. Available at: \url{http://riskfactor.cancer.gov/tools/nhanes_pam}. Accessed February 1, 2014.
+1. National Cancer Institute. Risk factor monitoring and methods: SAS programs for analyzing NHANES 2003-2004 accelerometer data. Available at: \url{http://riskfactor.cancer.gov/tools/nhanes_pam}. Accessed July 31, 2014.
 
 Acknowledgment: This material is based upon work supported by the National Science Foundation Graduate Research Fellowship under Grant No. DGE-0940903.
 }
@@ -79,7 +79,7 @@ Some additional information on the package accelerometry and its functions can b
 data(unidata)
 
 # Get data from ID number 21005
-counts.part1 <- unidata[unidata[,"seqn"]==21005,"paxinten"]
+counts.part1 <- unidata[unidata[, "seqn"] == 21005, "paxinten"]
 
 # Identify periods of valid wear time
 weartime.flag <- accel.weartime(counts = counts.part1)

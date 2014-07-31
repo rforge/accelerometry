@@ -24,10 +24,10 @@ Number of minutes with non-zero counts allowed during a non-wear interval.
 Maximum count value for a minute with non-zero counts during a non-wear interval.
 }
   \item{nci}{
-If TRUE, use non-wear algorithm from the NCI's SAS programs [1]; if FALSE, use regular algorithm.
+If TRUE, use non-wear algorithm from the NCI's SAS programs [1]; if FALSE, use regular algorithm (see Details).
 }
   \item{days.distinct}{
-if TRUE, treat each day of data as distinct, i.e. identify wear time in day 1, then day 2, etc.; if FALSE, apply algorithm on continuous basis for full monitoring period. Function assumes that first 1440 data points are day 1, next 1440 are day 2, and so on.
+if TRUE, treat each day of data as distinct, i.e. identify wear time in day 1, then day 2, etc.; if FALSE, apply algorithm on continuous basis for full monitoring period. Function assumes that first 1440 data points are day 1, next 1440 are day 2, and so on. 
 }
   \item{skipchecks}{
 If TRUE, function skips error checking code and runs slightly faster.
@@ -42,7 +42,7 @@ If nci is set to TRUE, non-wear time is classified according to the algorithm us
 Integer vector of same length as counts and weartime, with 1's indicating minutes of valid wear time, and 0's indicating minutes of non-wear time.
 }
 \references{
-1. National Cancer Institute. Risk factor monitoring and methods: SAS programs for analyzing NHANES 2003-2004 accelerometer data. Available at: \url{http://riskfactor.cancer.gov/tools/nhanes_pam}. Accessed February 1, 2014.
+1. National Cancer Institute. Risk factor monitoring and methods: SAS programs for analyzing NHANES 2003-2004 accelerometer data. Available at: \url{http://riskfactor.cancer.gov/tools/nhanes_pam}. Accessed July 31, 2014.
 
 Acknowledgment: This material is based upon work supported by the National Science Foundation Graduate Research Fellowship under Grant No. DGE-0940903.
 }
@@ -62,7 +62,7 @@ Some additional information on the package accelerometry and its functions can b
 data(unidata)
 
 # Get data from ID number 21005
-counts.part1 <- unidata[unidata[,"seqn"] == 21005,"paxinten"]
+counts.part1 <- unidata[unidata[, "seqn"] == 21005, "paxinten"]
 
 # Identify periods of valid wear time
 weartime.flag <- accel.weartime(counts = counts.part1)

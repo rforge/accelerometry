@@ -45,7 +45,8 @@ Some additional information on the package accelerometry and its functions can b
 data(unidata)
 
 # Get data from ID number 21005, Saturday only
-counts.saturday <- unidata[unidata[,"seqn"]==21005 & unidata[,"paxday"]==7,"paxinten"]
+counts.saturday <- 
+   unidata[unidata[, "seqn"] == 21005 & unidata[, "paxday"] == 7, "paxinten"]
 
 # Calculate and plot hourly count averages
 hourly.averages <- blockaves(x = counts.saturday, window = 60)

@@ -44,10 +44,10 @@ Some additional information on the package accelerometry and its functions can b
 data(unidata)
 
 # Get data from ID number 21005
-counts.part1 <- unidata[unidata[,"seqn"]==21005,"paxinten"]
+counts.part1 <- unidata[unidata[, "seqn"] == 21005, "paxinten"]
 
 # Create vector of counts during valid wear time only
-counts.part1.weartime <- counts.part1[accel.weartime(counts = counts.part1)==1]
+counts.part1.weartime <- counts.part1[accel.weartime(counts = counts.part1) == 1]
 
 # Calculate physical activity intensity variables
 intensity.variables <- accel.intensities(counts = counts.part1.weartime)

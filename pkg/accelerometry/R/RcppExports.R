@@ -659,15 +659,16 @@ inverse.rle2 <- function(x) {
   
 }
 
-accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1/5"), 
-                              start.time = "00:00:00", id = NULL, brevity = 1, valid.days = 1, 
-                              valid.week.days = 0, valid.weekend.days = 0, 
-                              int.cuts = c(100, 760, 2020, 5999), cpm.nci = FALSE, 
-                              days.distinct = FALSE, nonwear.window = 60, nonwear.tol = 0, 
-                              nonwear.tol.upper = 99, nonwear.nci = FALSE, weartime.minimum = 600, 
-                              weartime.maximum = 1440, use.partialdays = FALSE, 
-                              active.bout.length = 10, active.bout.tol = 0, mvpa.bout.tol.lower = 0, 
-                              vig.bout.tol.lower = 0, active.bout.nci = FALSE, sed.bout.tol = 0, 
+accel.process.uni <- function(counts, steps = NULL, nci.methods = FALSE, 
+                              start.date = as.Date("2014/1/5"), start.time = "00:00:00", id = NULL, 
+                              brevity = 1, valid.days = 1, valid.week.days = 0, 
+                              valid.weekend.days = 0, int.cuts = c(100, 760, 2020, 5999), 
+                              cpm.nci = FALSE, days.distinct = FALSE, nonwear.window = 60, 
+                              nonwear.tol = 0, nonwear.tol.upper = 99, nonwear.nci = FALSE, 
+                              weartime.minimum = 600, weartime.maximum = 1440, 
+                              partialday.minimum = 1440, active.bout.length = 10, active.bout.tol = 0, 
+                              mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, 
+                              active.bout.nci = FALSE, sed.bout.tol = 0, 
                               sed.bout.tol.maximum = int.cuts[2]-1, artifact.thresh = 25000, 
                               artifact.action = 1, weekday.weekend = FALSE, return.form = 2) {
     
@@ -712,6 +713,11 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
   # If length of steps and counts vectors are different, output error
   if (!is.null(steps) & length(steps) != length(counts)) {
     stop("For counts and steps inputs, please enter objects of same length")
+  }
+  
+  # If nci.methods is not a logical, output error
+  if (!is.logical(nci.methods)) {
+    stop("For nci.methods input, please enter TRUE or FALSE")
   }
   
   # If start.date is not a date, output error
@@ -787,9 +793,9 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
     stop("For weartime.maximum input, please enter positive value greater than weartime.minimum")
   }
   
-  # If use.partialdays is not a logical, output error
-  if (!is.logical(use.partialdays)) {
-    stop("For use.partialdays input, please enter TRUE or FALSE")
+  # If partialday.minimum is not in range, output error
+  if (!is.numeric(partialday.minimum) || partialday.minimum < 1 || partialday.minimum > 1440)  {
+    stop("For partialday.minimum input, please enter positive whole number less than or equal to 1440")
   }
   
   # If active.bout.length out of range, output error
@@ -847,27 +853,40 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
     stop("For return.form input, please enter 1 for per-person, 2 for per-day, or 3 for both")
   }
   
-  # If start time is not 00:00:00, drop the data corresponding to the first partial day
-  if (start.time != "00:00:00") {
-    extratime <- round(as.numeric(difftime(as.POSIXct(paste(start.date, "24:00:00")), as.POSIXct(paste(start.date, start.time))), units = "mins"))
-    if (extratime < 1440) {
-      counts <- counts[(extratime+1):length(counts)]
-      start.date <- start.date + 1
-      if (!is.null(steps)) {
-        steps <- steps[(extratime+1):length(steps)]
-      }
-    }
-  }
-  
   # Get number of minutes of data
   datalength <- length(counts)
   
-  # create daymat matrix with start and end times for each day
-  if (start.time == "24:00:00") {
-    start.time <- "00:00:00"
-    start.date <- start.date + 1
+  # If nci.methods is TRUE, set inputs to replicate data processing done by NCI's SAS programs
+  if (nci.methods == TRUE) {
+    
+    # Set certain inputs to match NCI methods
+    valid.days <- 4
+    valid.week.days <- 0
+    valid.weekend.days <- 0
+    int.cuts <- c(100, 760, 2020, 5999)
+    cpm.nci <- TRUE
+    days.distinct <- TRUE
+    nonwear.window <- 60
+    nonwear.tol <- 2
+    nonwear.tol.upper <- 100
+    nonwear.nci <- TRUE
+    weartime.minimum <- 600
+    weartime.maximum <- 1440
+    partialday.minimum <- 1440
+    active.bout.length <- 10
+    active.bout.tol <- 2
+    mvpa.bout.tol.lower <- 0
+    vig.bout.tol.lower <- 0
+    active.bout.nci <- TRUE
+    sed.bout.tol <- 0
+    sed.bout.tol.maximum <- 759
+    artifact.thresh <- 32767
+    artifact.action <- 3
+    
   }
-  extratime <- round(as.numeric(difftime(as.POSIXct(paste(start.date, "24:00:00")), as.POSIXct(paste(start.date, start.time)), units = "mins")))
+  
+  # Get start/stop minutes for each day of monitoring
+  extratime <- max(1, round(as.numeric(difftime(as.POSIXct(paste(start.date, "24:00:00")), as.POSIXct(paste(start.date, start.time)), units = "mins"))))
   startmins <- 1
   stopmins <- min(extratime, datalength)
   if (stopmins < datalength) {
@@ -1009,7 +1028,7 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
     
     # Check whether day is valid for analysis; if not, mark as invalid
     if (daywear < weartime.minimum | daywear > weartime.maximum | (artifact.action == 1 & maxcount >= artifact.thresh) |
-          (use.partialdays == FALSE & daylength < 1440)) {
+          daylength < partialday.minimum) {
       dayvars[i,3] <- 0
     } else {
       dayvars[i,3] <- 1
@@ -1162,14 +1181,15 @@ accel.process.uni <- function(counts, steps = NULL, start.date = as.Date("2014/1
 }
 
 
-accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("2014/1/5"), 
-                              start.time = "00:00:00", id = NULL, brevity = 1, valid.days = 1, 
-                              valid.week.days = 0, valid.weekend.days = 0, int.axis = "vert",
+accel.process.tri <- function(counts.tri, steps = NULL, nci.methods = FALSE, 
+                              start.date = as.Date("2014/1/5"), start.time = "00:00:00", id = NULL, 
+                              brevity = 1, valid.days = 1, valid.week.days = 0, 
+                              valid.weekend.days = 0, int.axis = "vert", 
                               int.cuts = c(100, 760, 2020, 5999), cpm.nci = FALSE, 
                               hourly.axis = "vert", days.distinct = FALSE, nonwear.axis = "vert", 
                               nonwear.window = 60, nonwear.tol = 0, nonwear.tol.upper = 99, 
                               nonwear.nci = FALSE, weartime.minimum = 600, weartime.maximum = 1440, 
-                              use.partialdays = FALSE, active.bout.length = 10, active.bout.tol = 0, 
+                              partialday.minimum = 1440, active.bout.length = 10, active.bout.tol = 0, 
                               mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, 
                               active.bout.nci = FALSE, sed.bout.tol = 0, 
                               sed.bout.tol.maximum = int.cuts[2]-1, artifact.axis = "vert", 
@@ -1208,6 +1228,11 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
   # If length of steps and counts.tri vectors are different, output error
   if (!is.null(steps) & length(steps) != nrow(counts.tri)) {
     stop("For counts.tri and steps inputs, please enter objects of same length")
+  }
+  
+  # If nci.methods is not a logical, output error
+  if (!is.logical(nci.methods)) {
+    stop("For nci.methods input, please enter TRUE or FALSE")
   }
   
   # If start.date is not a date, output error
@@ -1298,9 +1323,9 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     stop("For weartime.maximum input, please enter positive value greater than weartime.minimum")
   }
   
-  # If use.partialdays is not a logical, output error
-  if (!is.logical(use.partialdays)) {
-    stop("For use.partialdays input, please enter TRUE or FALSE")
+  # If partialday.minimum is not in range, output error
+  if (!is.numeric(partialday.minimum) || partialday.minimum < 1 || partialday.minimum > 1440)  {
+    stop("For partialday.minimum input, please enter positive whole number less than or equal to 1440")
   }
   
   # If active.bout.length out of range, output error
@@ -1358,15 +1383,44 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     stop("For return.form input, please enter 1 for per-person, 2 for per-day, or 3 for both")
   }
   
+  # If nci.methods is TRUE, set inputs to replicate data processing done by NCI's SAS programs
+  if (nci.methods == TRUE) {
+    
+    # Set certain inputs to match NCI methods
+    valid.days <- 4
+    valid.week.days <- 0
+    valid.weekend.days <- 0
+    int.axis <- "vert"
+    int.cuts <- c(100, 760, 2020, 5999)
+    cpm.nci <- TRUE
+    hourly.axis <- "vert"
+    days.distinct <- TRUE
+    nonwear.axis <- "vert"
+    nonwear.window <- 60
+    nonwear.tol <- 2
+    nonwear.tol.upper <- 100
+    nonwear.nci <- TRUE
+    weartime.minimum <- 600
+    weartime.maximum <- 1440
+    partialday.minimum <- 1440
+    active.bout.length <- 10
+    active.bout.tol <- 2
+    mvpa.bout.tol.lower <- 0
+    vig.bout.tol.lower <- 0
+    active.bout.nci <- TRUE
+    sed.bout.tol <- 0
+    sed.bout.tol.maximum <- 759
+    artifact.axis <- "vert"
+    artifact.thresh <- 32767
+    artifact.action <- 3
+    
+  }
+  
   # Get number of minutes of data
   datalength <- nrow(counts.tri)
   
-  # create daymat matrix with start and end times for each day
-  if (start.time == "24:00:00") {
-    start.time <- "00:00:00"
-    start.date <- start.date + 1
-  }
-  extratime <- round(as.numeric(difftime(as.POSIXct(paste(start.date, "24:00:00")), as.POSIXct(paste(start.date, start.time)), units = "mins")))
+  # Get start/stop minutes for each day of monitoring
+  extratime <- max(1, round(as.numeric(difftime(as.POSIXct(paste(start.date, "24:00:00")), as.POSIXct(paste(start.date, start.time)), units = "mins"))))
   startmins <- 1
   stopmins <- min(extratime, datalength)
   if (stopmins < datalength) {
@@ -1551,7 +1605,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, start.date = as.Date("20
     
     # Check whether day is valid for analysis; if not, mark as invalid
     if (daywear < weartime.minimum | daywear > weartime.maximum | (artifact.action == 1 & maxcounts[artifact.axis] >= artifact.thresh) |
-          (use.partialdays == FALSE & daylength < 1440)) {
+          daylength < partialday.minimum) {
       dayvars[i,3] <- 0
     } else {
       dayvars[i,3] <- 1

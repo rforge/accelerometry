@@ -45,7 +45,7 @@ Some additional information on the package accelerometry and its functions can b
 data(unidata)
 
 # Get data from ID number 21005
-counts.part1 <- unidata[unidata[,"seqn"]==21005,"paxinten"]
+counts.part1 <- unidata[unidata[, "seqn"] == 21005, "paxinten"]
 
 # Create vector of all 10-minute moving averages
 all.10min.averages <- movingaves(x = counts.part1, window = 10)
