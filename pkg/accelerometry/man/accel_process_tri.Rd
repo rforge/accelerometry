@@ -15,8 +15,8 @@ accel.process.tri(counts.tri, steps = NULL, nci.methods = FALSE,
                   hourly.axis = "vert", days.distinct = FALSE, nonwear.axis = "vert", 
                   nonwear.window = 60, nonwear.tol = 0, nonwear.tol.upper = 99, 
                   nonwear.nci = FALSE, weartime.minimum = 600, weartime.maximum = 1440, 
-                  partialday.minimum = 1440, active.bout.length = 10, active.bout.tol = 0, 
-                  mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, 
+                  partialday.minimum = 1440, active.bout.length = 10, 
+                  active.bout.tol = 0, mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, 
                   active.bout.nci = FALSE, sed.bout.tol = 0, 
                   sed.bout.tol.maximum = int.cuts[2] - 1, artifact.axis = "vert", 
                   artifact.thresh = 25000, artifact.action = 1, weekday.weekend = FALSE, 
@@ -151,7 +151,7 @@ In the future, a sample triaxial dataset will be included in the package and som
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}.
 }
 \seealso{
-\code{\link{accel.artifacts}}, \code{\link{accel.bouts}}, \code{\link{accel.process.uni}}, \code{\link{accel.intensities}}, \code{\link{accel.sedbreaks}}, \code{\link{accel.weartime}}, \code{\link{blockaves}}, \code{\link{movingaves}}, \code{\link{rle2}}
+\code{\link{accel.artifacts}}, \code{\link{accel.bouts}}, \code{\link{accel.process.uni}}, \code{\link{accel.intensities}}, \code{\link{accel.sedbreaks}}, \code{\link{accel.weartime}}, \code{\link{blockaves}}, \code{\link{movingaves}}, \code{\link{rle2}}, \code{\link{inverse.rle2}}
 }
 \examples{
 # Load in sample data frame

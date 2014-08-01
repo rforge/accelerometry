@@ -13,7 +13,7 @@ This package contains a collection of functions that perform operations on time-
 Package: \tab accelerometry\cr
 Type: \tab Package\cr
 Version: \tab 2.2.2\cr
-Date: \tab 2014-07-31\cr
+Date: \tab 2014-08-01\cr
 License: \tab GPL-2\cr
 }
 The following functions are contained in the package accelerometry:
@@ -64,7 +64,7 @@ weartime.flag <- accel.weartime(counts = counts.part1)
 
 # Flag minutes that are part of a moderate-to-vigorous activity bout
 mvpa.bouts.flag <- accel.bouts(counts = counts.part1, weartime = weartime.flag, 
-                              thresh.lower = 2020)
+                               thresh.lower = 2020)
                               
 # Obtain maximum 10-minute count average
 max.10min.movingave <- movingaves(x = counts.part1, window = 10, return.max = TRUE)

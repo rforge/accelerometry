@@ -14,10 +14,10 @@ accel.process.uni(counts, steps = NULL, nci.methods = FALSE,
                   cpm.nci = FALSE, days.distinct = FALSE, nonwear.window = 60, 
                   nonwear.tol = 0, nonwear.tol.upper = 99, nonwear.nci = FALSE, 
                   weartime.minimum = 600, weartime.maximum = 1440, 
-                  partialday.minimum = 1440, active.bout.length = 10, active.bout.tol = 0, 
-                  mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, 
+                  partialday.minimum = 1440, active.bout.length = 10, 
+                  active.bout.tol = 0, mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, 
                   active.bout.nci = FALSE, sed.bout.tol = 0, 
-                  sed.bout.tol.maximum = int.cuts[2]-1, artifact.thresh = 25000, 
+                  sed.bout.tol.maximum = int.cuts[2] - 1, artifact.thresh = 25000, 
                   artifact.action = 1, weekday.weekend = FALSE, return.form = 2)
 }
 \arguments{
@@ -145,7 +145,7 @@ If the user allows for a tolerance in bout detection (e.g. active.bout.tol = 2) 
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}.
 }
 \seealso{
-\code{\link{accel.artifacts}}, \code{\link{accel.bouts}}, \code{\link{accel.process.tri}}, \code{\link{accel.intensities}}, \code{\link{accel.sedbreaks}}, \code{\link{accel.weartime}}, \code{\link{blockaves}}, \code{\link{movingaves}}, \code{\link{rle2}}
+\code{\link{accel.artifacts}}, \code{\link{accel.bouts}}, \code{\link{accel.process.tri}}, \code{\link{accel.intensities}}, \code{\link{accel.sedbreaks}}, \code{\link{accel.weartime}}, \code{\link{blockaves}}, \code{\link{movingaves}}, \code{\link{rle2}}, \code{\link{inverse.rle2}}
 }
 \examples{
 # Load in sample data frame
@@ -167,21 +167,21 @@ accel.list <- accel.process.uni(counts = counts.part1, id = id.part1,
                                     return.form = 3)
                   
 # Process data according to methods used in NCI's SAS programs [2]
-accel.nci <- accel.process.uni(counts = counts.part1, id = id.part1, brevity = 2, 
-                               valid.days = 4, cpm.nci = TRUE, days.distinct = TRUE, 
-                               nonwear.tol = 2, nonwear.tol.upper = 100,
-                               nonwear.nci = TRUE, weartime.maximum = 1440, 
-                               active.bout.tol = 2, active.bout.nci = TRUE, 
-                               artifact.thresh = 32767, artifact.action = 3, 
-                               return.form = 3)
+accel.nci1 <- accel.process.uni(counts = counts.part1, id = id.part1, brevity = 2, 
+                                valid.days = 4, cpm.nci = TRUE, days.distinct = TRUE, 
+                                nonwear.tol = 2, nonwear.tol.upper = 100,
+                                nonwear.nci = TRUE, weartime.maximum = 1440, 
+                                active.bout.tol = 2, active.bout.nci = TRUE, 
+                                artifact.thresh = 32767, artifact.action = 3, 
+                                return.form = 3)
                                
 # Repeat, but use nci.methods input for convenience
 accel.nci2 <- accel.process.uni(counts = counts.part1, id = id.part1, nci.methods = TRUE, 
                                 brevity = 2, return.form = 3)
                                 
 # Verify that previous two function calls give identical results
-all(accel.nci[[1]] == accel.nci2[[1]])
-all(accel.nci[[2]] == accel.nci2[[2]])
+all(accel.nci1[[1]] == accel.nci2[[1]])
+all(accel.nci1[[2]] == accel.nci2[[2]])
 }
 \keyword{ accelerometry }
 \keyword{ physical activity }
