@@ -148,6 +148,8 @@ Some additional information on the package accelerometry and its functions can b
 \code{\link{accel.artifacts}}, \code{\link{accel.bouts}}, \code{\link{accel.process.tri}}, \code{\link{accel.intensities}}, \code{\link{accel.sedbreaks}}, \code{\link{accel.weartime}}, \code{\link{blockaves}}, \code{\link{movingaves}}, \code{\link{rle2}}, \code{\link{inverse.rle2}}
 }
 \examples{
+progress(1)
+
 # Load in sample data frame
 data(unidata)
 
