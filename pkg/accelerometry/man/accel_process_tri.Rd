@@ -30,7 +30,36 @@ Three-column accelerometer counts matrix or data frame, where columns 1-3 repres
 Steps vector; must be same length as counts.tri (if specified).
 }
 \item{nci.methods}{
-If TRUE, inputs are set to replicate the data processing methods used by the NCI's SAS programs [1]. More specifically: valid.days = 4, valid.week.days = 0, valid.weekend.days = 0, int.axis = "vert", int.cuts = c(100, 760, 2020, 5999), cpm.nci = TRUE, hourly.axis = "vert", days.distinct = TRUE, nonwear.axis = "vert", nonwear.window = 60, nonwear.tol = 2, nonwear.tol.upper = 100, nonwear.nci = TRUE, weartime.minimum = 600, weartime.maximum = 1440, partialday.minimum = 1440, active.bout.length = 10, active.bout.tol = 2, mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, active.bout.nci = TRUE, sed.bout.tol = 0, sed.bout.tol.maximum = 759, artifact.axis = "vert", artifact.thresh = 32767, and artifact.action = 3. Even if nci.methods is set to TRUE, the user can specify non-default values for brevity, weekday.weekend, and return.form.
+If TRUE, inputs are set to replicate the data processing methods used by the NCI's SAS programs [1]. More specifically: 
+
+valid.days = 4
+valid.week.days = 0
+valid.weekend.days = 0
+int.axis = "vert"
+int.cuts = c(100, 760, 2020, 5999)
+cpm.nci = TRUE
+hourly.axis = "vert"
+days.distinct = TRUE
+nonwear.axis = "vert"
+nonwear.window = 60
+nonwear.tol = 2
+nonwear.tol.upper = 100
+nonwear.nci = TRUE
+weartime.minimum = 600
+weartime.maximum = 1440
+partialday.minimum = 1440
+active.bout.length = 10
+active.bout.tol = 2
+mvpa.bout.tol.lower = 0
+vig.bout.tol.lower = 0
+active.bout.nci = TRUE
+sed.bout.tol = 0
+sed.bout.tol.maximum = 759
+artifact.axis = "vert"
+artifact.thresh = 32767
+artifact.action = 3
+
+Even if nci.methods is set to TRUE, the user can specify non-default values for brevity, weekday.weekend, and return.form.
 }
   \item{start.date}{
 Date of first day of monitoring (must be of class 'date'). Only used to extract day of week, so if day of week is known but date is not, user can enter any date that corresponds to that day of the week. The default date corresonds to the first Sunday in January 2014. 
@@ -145,8 +174,6 @@ Dane R. Van Domelen
 }
 \note{
 This function is similar to \code{\link{accel.process.uni}}, but works with triaxial accelerometer data. For example, rather than just calculating a single counts variable for each day of monitoring, accel.process.tri calculates a daily counts variable for the vertical axis, anteroposterior (AP) axis, and mediolateral (ML) axis, and also for the triaxial sum and triaxial vector magnitude (defined as the square root of the sum of the squares of the three axes). Also, the user can choose which of the five signals to use for artifact correction, non-wear detection, activity intensity classification, and hourly counts per minute averaging. 
-
-In the future, a sample triaxial dataset will be included in the package and some Examples will be provided below. For now, researchers should see the Examples for \code{\link{accel.process.uni}}. This function has very similar inputs. 
 
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}.
 }

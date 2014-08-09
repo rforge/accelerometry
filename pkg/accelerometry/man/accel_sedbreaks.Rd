@@ -26,9 +26,6 @@ If TRUE, function returns vector of 0's and 1's in which 1's indicate minutes in
   \item{skipchecks}{If TRUE, function skips error checking code and runs slightly faster.
 }
 }
-\details{
-NA
-}
 \value{
 Either a single numeric value indicating the total number of sedentary breaks during the monitoring period, or a vector of same length as counts where 1's indicate minutes in which a sedentary break has occurred.
 }

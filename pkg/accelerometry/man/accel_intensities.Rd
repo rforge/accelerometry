@@ -19,9 +19,6 @@ Vector of four cut-points from which five intensity ranges are derived. For exam
   \item{skipchecks}{If TRUE, function skips error checking code and runs slightly faster.
 }
 }
-\details{
-NA
-}
 \value{
 An integer vector in which the first eight values are minutes in intensity 1, 2, 3, 4, 5, 2-3, 4-5, and 2-5, respectively, and the next eight values are counts accumulated during time spent in intensity 1, 2, 3, 4, 5, 2-3, 4-5, and 2-5. Intensities 1-5 typically correspond to sedentary, light, lifestyle, moderate, and vigorous.
 }

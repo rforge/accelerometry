@@ -14,9 +14,6 @@ inverse.rle2(x)
 Object returned by rle2.
 }
 }
-\details{
-NA
-}
 \value{
 Numeric or character vector.
 }

@@ -19,9 +19,6 @@ Minimum count value that is considered an artifact.
   \item{skipchecks}{If TRUE, function skips error checking code and runs slightly faster.
 }
 }
-\details{
-NA
-}
 \value{
 An integer vector identical to the input vector counts but with artifacts corrected.
 }

@@ -28,7 +28,32 @@ Time series accelerometer counts vector
 Steps vector; must be same length as counts (if specified).
 }
   \item{nci.methods}{
-If TRUE, inputs are set to replicate the data processing methods used by the NCI's SAS programs [2]. More specifically: valid.days = 4, valid.week.days = 0, valid.weekend.days = 0, int.cuts = c(100, 760, 2020, 5999), cpm.nci = TRUE, days.distinct = TRUE, nonwear.window = 60, nonwear.tol = 2, nonwear.tol.upper = 100, nonwear.nci = TRUE, weartime.minimum = 600, weartime.maximum = 1440, partialday.minimum = 1440, active.bout.length = 10, active.bout.tol = 2, mvpa.bout.tol.lower = 0, vig.bout.tol.lower = 0, active.bout.nci = TRUE, sed.bout.tol = 0, sed.bout.tol.maximum = 759, artifact.thresh = 32767, and artifact.action = 3. Even if nci.methods is set to TRUE, the user can specify non-default values for brevity, weekday.weekend, and return.form.
+If TRUE, inputs are set to replicate the data processing methods used by the NCI's SAS programs [2]. More specifically: 
+
+valid.days = 4
+valid.week.days = 0
+valid.weekend.days = 0
+int.cuts = c(100, 760, 2020, 5999)
+cpm.nci = TRUE
+days.distinct = TRUE
+nonwear.window = 60
+nonwear.tol = 2
+nonwear.tol.upper = 100
+nonwear.nci = TRUE
+weartime.minimum = 600
+weartime.maximum = 1440
+partialday.minimum = 1440
+active.bout.length = 10
+active.bout.tol = 2
+mvpa.bout.tol.lower = 0
+vig.bout.tol.lower = 0
+active.bout.nci = TRUE
+sed.bout.tol = 0
+sed.bout.tol.maximum = 759
+artifact.thresh = 32767
+artifact.action = 3. 
+
+Even if nci.methods is set to TRUE, the user can specify non-default values for brevity, weekday.weekend, and return.form.
 }
   \item{start.date}{
 Date of first day of monitoring (must be of class 'date'). Only used to extract day of week, so if day of week is known but date is not, user can enter any date that corresponds to that day of the week. The default date corresonds to the first Sunday in January 2014. 
@@ -76,7 +101,7 @@ If TRUE, use non-wear algorithm from the NCI's SAS programs [2]; if FALSE, use r
 Minimum number of wear time minutes for a day of monitoring to be considered valid.
 }
   \item{weartime.maximum}{
-Maximum number of wear time minutes for a day of monitoring to be considered valid.
+Maximum number of wear time minutes for a day of monitoring to be considered valid. The default is 1440, but it may be better to set it to a lower value (e.g. 1200) if participants were instructed to remove their accelerometers for sleeping. Daily wear time greater than 1200 minutes corresponds to less than 4 hours of sleep. In these cases it seems more likely that the participant slept while wearing the device, and as a result had small movements overnight show up as wear time. This could inflate estimates of sedentary time and shrink estimates of physical activity, e.g. counts per minute. 
 }
   \item{partialday.minimum}{
 Minimum number of minutes for a partial day of monitoring to be processed and potentially considered valid for analysis (generally applies only to the first and last days of monitoring, which may not cover full 24-hour periods). This input is included because some researchers may prefer to exclude a day that only has data from, say, 1 pm to midnight. Even though there may be sufficient wear time during that period to be classified as a valid day, the missing chunk of data prior to 1 pm may result in the day not being representative of the participant's usual physical activity.
@@ -85,7 +110,7 @@ Minimum number of minutes for a partial day of monitoring to be processed and po
 Minimum length of moderate-to-vigorous physical activity (MVPA) and vigorous physical activity (VPA) bouts.
 }
   \item{active.bout.tol}{
-Number of minutes with counts below the required intensity level allowed during MVPA and VPA bouts.
+Number of minutes with counts below the required intensity level allowed during MVPA and VPA bouts. If set to a non-zero value, and active.bout.nci is FALSE, specifying non-zero values for mvpa.bout.tol.lower and vig.bout.tol.lower is highly recommended. Otherwise the algorithm will tend to classify minutes immediately before and after an activity bout as being part of the bout.
 }
   \item{mvpa.bout.tol.lower}{
 Lower cut-off for count values outside of MVPA intensity range during an MVPA bout.
@@ -103,10 +128,10 @@ Number of minutes with counts outside sedentary range allowed during sedentary b
 Upper cut-off for count values outside sedentary range during a sedentary bout.
 }
   \item{artifact.thresh}{
-Lower cut-off for counts that are abnormally high and should be considered artifacts.
+Lower cut-off for counts that are abnormally high and should be considered artifacts (see Note).
 }
   \item{artifact.action}{
-If 1, exclude days that have one or more artifacts; if 2, consider artifacts as non-wear time; if 3, replace artifacts with average of neighboring count values; if 4, take no action.
+If 1, exclude days that have one or more artifacts; if 2, consider artifacts as non-wear time; if 3, replace artifacts with average of neighboring count values; if 4, take no action (see Note).
 }
   \item{weekday.weekend}{
 If TRUE, function computes physical activity averages for weekdays and weekend days separately (in addition to daily averages for all valid days, which are computed regardless). If FALSE, function only computes averages for all valid days.
@@ -114,9 +139,6 @@ If TRUE, function computes physical activity averages for weekdays and weekend d
   \item{return.form}{
 If 1, function returns physical activity variables on per-person basis, i.e. daily averages for each participant; if 2, function returns variables on per-day basis; if 3, function returns both via a list.
 }
-}
-\details{
-NA
 }
 \value{
 A single matrix or a list of two matrices, depending on return.form.
@@ -132,15 +154,7 @@ Acknowledgment: This material is based upon work supported by the National Scien
 Dane R. Van Domelen
 }
 \note{
-Leaving days.distinct set to FALSE is strongly encouraged. If set to TRUE, activity bouts and non-wear periods that span the end of one day and the beginning of the next may be missed. This option is included because it is necessary to reproduce the algorithm used in the NCI's SAS programs [2].
-
-The default for weartime.maximum is 1440, but it may be better to set it to a lower value (e.g. 1200) if the participants were instructed to remove their accelerometers for sleeping. Daily wear time greater than 1200 minutes corresponds to less than 4 hours of sleep. In these cases it seems more likely that the participant slept while wearing the device, and as a result had small movements overnight show up as wear time. This could inflate estimates of sedentary time and shrink estimates of physical activity, e.g. counts per minute (CPM). 
-
-For partialday.minimum, one might prefer to include days of monitoring that do not have a full 1440 minutes of data, as long as the wear time criteria are met. However, it seems likely that missing segments of data might tend to occur at a particular time of day (e.g. evening), and physical activity is strongly associated with time of day. Therefore, including such days could introduce bias.
-
 There is no perfect solution for dealing with abnormally high count values, also known as artifacts. The NCI's SAS programs replace artifacts (which they define as the ActiGraph AM-7164 maximum, 32767) with the mean of neighboring count values [2]. This can be done by specifying artifact.thresh = 32767 and artifact.action = 3. This method may work well, but in many cases count values that are artifacts are surrounded by count values that are only slightly lower, bringing into question whether the entire group of counts is plausible or implausible. Count values at or around the cut-point defined by artifact.thresh can contribute greatly to daily counts. Therefore the default settings, artifact.thresh = 25000 and artifact.action = 1, simply excludes days of monitoring with one or more count values of 25000 or greater. As this solution is clearly not ideal, users are welcome to choose their own preferred setting for artifact.thresh and artifact.action.
-
-If the user allows for a tolerance in bout detection (e.g. active.bout.tol = 2) and does not use the NCI algorithm (active.bout.nci = FALSE), specifying non-zero values for mvpa.bout.tol.lower and vig.bout.tol.lower is highly recommended. Otherwise the algorithm will tend to classify minutes immediately before and after an activity bout as being part of the bout.
 
 Some additional information on the package accelerometry and its functions can be found on the author's website, \url{https://sites.google.com/site/danevandomelen/}.
 }
