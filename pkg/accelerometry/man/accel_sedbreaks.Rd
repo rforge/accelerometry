@@ -23,7 +23,8 @@ Minimum count value that must be achieved to record a sedentary break.
   \item{return.flags}{
 If TRUE, function returns vector of 0's and 1's in which 1's indicate minutes in which a sedentary break has occurred; if FALSE, function returns total number of sedentary breaks during monitoring period.
 }
-  \item{skipchecks}{If TRUE, function skips error checking code and runs slightly faster.
+  \item{skipchecks}{
+If TRUE, function skips error checking code and runs slightly faster.
 }
 }
 \value{

@@ -16,7 +16,8 @@ Time series accelerometer counts vector.
   \item{thresh}{
 Minimum count value that is considered an artifact.
 }
-  \item{skipchecks}{If TRUE, function skips error checking code and runs slightly faster.
+  \item{skipchecks}{
+If TRUE, function skips error checking code and runs slightly faster.
 }
 }
 \value{

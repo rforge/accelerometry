@@ -7,16 +7,17 @@ Classification of physical activity intensities
 This function computes the number of minutes with counts in user-defined intensity levels, and the number of counts accumulated during time spent in each intensity level. It is intended for use with minute-to-minute accelerometer data.
 }
 \usage{
-accel.intensities(counts, thresh = c(100,760,2020,5999), skipchecks = FALSE)
+accel.intensities(counts, thresh = c(100, 760, 2020, 5999), skipchecks = FALSE)
 }
 \arguments{
   \item{counts}{
 Time series accelerometer counts vector.
 }
   \item{thresh}{
-Vector of four cut-points from which five intensity ranges are derived. For example, if thresh=c(100,760,2020,5999), minutes with 0-99 counts are classified as intensity level 1, minutes with 100-759 counts are classified as intensity level 2, ... , and minuts with 5999 or greater counts are classified as intensity level 5. By default the function also returns time in intensities 2-3, 4-5, and 2-5.
+Vector of four cut-points from which five intensity ranges are derived. For example, if thresh = c(100, 760, 2020, 5999), minutes with 0-99 counts are classified as intensity level 1, minutes with 100-759 counts are classified as intensity level 2, ... , and minuts with 5999 or greater counts are classified as intensity level 5. By default the function also returns time in intensities 2-3, 4-5, and 2-5.
 }
-  \item{skipchecks}{If TRUE, function skips error checking code and runs slightly faster.
+  \item{skipchecks}{
+If TRUE, function skips error checking code and runs slightly faster.
 }
 }
 \value{

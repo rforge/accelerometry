@@ -22,11 +22,8 @@ If TRUE, function returns the maximum moving average; if FALSE, function returns
   \item{skipchecks}{
 If TRUE, function skips error checking code and runs slightly faster.}
 }
-\details{
-NA
-}
 \value{
-Either a single numeric value indicating the maximum moving average, or a vector of length (length(x)-window+1) with moving averages.
+Either a single numeric value indicating the maximum moving average, or a vector of length (length(x) - window + 1) with moving averages.
 }
 \references{
 Acknowledgment: This material is based upon work supported by the National Science Foundation Graduate Research Fellowship under Grant No. DGE-0940903.

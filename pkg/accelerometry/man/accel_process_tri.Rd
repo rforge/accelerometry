@@ -37,7 +37,7 @@ valid.days = 4; valid.week.days = 0; valid.weekend.days = 0; int.axis = "vert"; 
 Even if nci.methods is set to TRUE, the user can specify non-default values for brevity, weekday.weekend, and return.form.
 }
   \item{start.date}{
-Date of first day of monitoring (must be of class 'date'). Only used to extract day of week, so if day of week is known but date is not, user can enter any date that corresponds to that day of the week. The default date corresonds to the first Sunday in January 2014. 
+Date of first day of monitoring (must be of class 'date'). Only used to extract day of week, so if day of week is known but date is not, user can enter any date that corresponds to that day of the week. The default date corresponds to the first Sunday in January 2014. 
 }
   \item{start.time}{
 Optional character vector indicating the start time for monitoring. If not specified it is assumed to be 00:00:00, i.e. the very beginning of the first day.
@@ -61,7 +61,7 @@ Minimum number of valid weekend days to be considered valid for analysis.
 Axis that should be used to classify intensities. Should be one of "vert", "ap", "ml", "sum" (for triaxial sum), or "mag" (for triaxial vector magnitude).
 }
   \item{int.cuts}{
-Vector of four cut-points from which five intensity ranges are derived using the accelerometer axis specified by int.axis. For example, if int.axis="vert" and thresh=c(100,760,2020,5999), minutes with 0-99 vertical axis counts are classified as intensity level 1, minutes with 100-759 counts are classified as intensity level 2, ... , and minutes with 5999 or greater counts are classified as intensity level 5. Intensities 1-5 typically correspond to sedentary, light, lifestyle, moderate, and vigorous.
+Vector of four cut-points from which five intensity ranges are derived using the accelerometer axis specified by int.axis. For example, if int.axis = "vert" and thresh = c(100, 760, 2020, 5999), minutes with 0-99 vertical axis counts are classified as intensity level 1, minutes with 100-759 counts are classified as intensity level 2, ... , and minutes with 5999 or greater counts are classified as intensity level 5. Intensities 1-5 typically correspond to sedentary, light, lifestyle, moderate, and vigorous.
 }
   \item{cpm.nci}{
 If TRUE, average counts per minute is calculated by dividing average daily counts by average daily weartime, as opposed to averaging each day's counts per minute value. In general, leave as FALSE unless you want to replicate the NCI's SAS programs [1].
@@ -85,7 +85,7 @@ Number of minutes with non-zero counts allowed during a non-wear interval.
 Maximum count value for a minute with non-zero counts during a non-wear interval.
 }
   \item{nonwear.nci}{
-If TRUE, use non-wear algorithm from the NCI's SAS programs [1]; if FALSE, use regular algorithm.
+If TRUE, use non-wear algorithm from the NCI's SAS programs [1]; if FALSE, use regular algorithm (see Details).
 }
   \item{weartime.minimum}{
 Minimum number of wear time minutes for a day of monitoring to be considered valid.
@@ -109,7 +109,7 @@ Lower cut-off for count values outside of MVPA intensity range during an MVPA bo
 Lower cut-off for count values outside of VPA intensity range during a VPA bout.
 }
   \item{active.bout.nci}{
-If TRUE, use activity bouts algorithm from the NCI's SAS programs [1]; if FALSE, use regular algorithm.
+If TRUE, use activity bouts algorithm from the NCI's SAS programs [1]; if FALSE, use regular algorithm (see Details).
 }
   \item{sed.bout.tol}{
 Number of minutes with counts outside sedentary range allowed during sedentary bouts.
@@ -134,7 +134,9 @@ If 1, function returns physical activity variables on per-person basis, i.e. dai
 }
 }
 \details{
-NA
+The algorithm used to identify non-wear time is defined by function inputs nonwear.axis, nonwear.window, nonwear.tol, nonwear.tol.upper, and nonwear.nci. If nonwear.nci is set to FALSE, a `regular' non-wear algorithm is used. This algorithm classifies as non-wear time any interval of length nonwear.window in which no more than nonwear.tol counts are non-zero, and those counts are all less than nonwear.tol.upper. If nonwear.nci is set to TRUE, the non-wear algorithm from the NCI's SAS programs [2] is used. This algorithm classifies as non-wear time any interval of length nonwear.window that starts with a count value of 0, does not contain any periods with (nonwear.tol + 1) consecutive non-zero count values, and does not contain any counts greater than nonwear.tol.upper. Once a non-wear bout is established, it continues until there are (nonwear.tol + 1) consecutive non-zero count values or a single count value greater than nonwear.tol.upper.
+
+The activity bout algorithm operates similarly to the non-wear algorithm. If active.bout.nci is set to FALSE, a `regular' algorithm is used. To illustrate, any interval of length active.bout.length where no more than active.bout.tol minutes have counts less than int.cuts[3], and the counts below int.cuts[3] are all mvpa.bout.tol.lower or greater, is considered an MVPA bout. If active.bout.nci is set to TRUE, the NCI's algorithm is used. This algorithm defines an MVPA bout as an interval that starts with ten consecutive count values greater than or equal to int.cuts[3], allowing for up to active.bout.tol minutes with counts below int.cuts[3]. The first minute of the bout cannot be below int.cuts[3]. Once the MVPA bout is established, it continues until there are (active.bout.tol + 1) consecutive minutes with counts less than int.cuts[3]. The parameters mvpa.bout.tol.lower and vig.bout.tol.lower are not used in the NCI bout algorithm.
 }
 \value{
 A single matrix or a list of two matrices, depending on return.form.

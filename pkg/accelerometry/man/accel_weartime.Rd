@@ -36,7 +36,7 @@ If TRUE, function skips error checking code and runs slightly faster.
 \details{
 If nci is set to FALSE, the algorithm uses a moving window to go through every possible interval of length window in input vector counts. Any interval in which no more than tol counts are non-zero, and those counts are less than tol.upper, is classified as non-wear time. 
 
-If nci is set to TRUE, non-wear time is classified according to the algorithm used in the NCI's SAS programs [1]. Briefly, this algorithm defines a non-wear period as an interval of length window that starts with a count value of 0, does not contain any periods with (tol+1) consecutive non-zero count values, and does not contain any counts greater than tol.upper. If these criteria are met, the bout continues until there are (tol+1) consecutive non-zero count values or a single count value greater than tol.upper.
+If nci is set to TRUE, non-wear time is classified according to the algorithm used in the NCI's SAS programs [1]. Briefly, this algorithm defines a non-wear period as an interval of length window that starts with a count value of 0, does not contain any periods with (tol + 1) consecutive non-zero count values, and does not contain any counts greater than tol.upper. If these criteria are met, the bout continues until there are (tol + 1) consecutive non-zero count values or a single count value greater than tol.upper.
 }
 \value{
 Integer vector of same length as counts and weartime, with 1's indicating minutes of valid wear time, and 0's indicating minutes of non-wear time.

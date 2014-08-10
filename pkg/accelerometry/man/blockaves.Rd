@@ -20,11 +20,8 @@ Window length.
 If TRUE, function skips error checking code and runs slightly faster.
 }
 }
-\details{
-NA
-}
 \value{
-Vector of length floor(length(x)/window)
+Vector of length floor(length(x) / window)
 }
 \references{
 Acknowledgment: This material is based upon work supported by the National Science Foundation Graduate Research Fellowship under Grant No. DGE-0940903.
