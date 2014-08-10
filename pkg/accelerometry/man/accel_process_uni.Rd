@@ -10,7 +10,7 @@ This function calculates a variety of physical activity variables based on uniax
 accel.process.uni(counts, steps = NULL, nci.methods = FALSE, 
                   start.date = as.Date("2014/1/5"), start.time = "00:00:00", id = NULL, 
                   brevity = 1, valid.days = 1, valid.week.days = 0, 
-                  valid.weekend.days = 0, int.cuts = c(100,760,2020,5999), 
+                  valid.weekend.days = 0, int.cuts = c(100, 760, 2020, 5999), 
                   cpm.nci = FALSE, days.distinct = FALSE, nonwear.window = 60, 
                   nonwear.tol = 0, nonwear.tol.upper = 99, nonwear.nci = FALSE, 
                   weartime.minimum = 600, weartime.maximum = 1440, 
@@ -25,7 +25,7 @@ accel.process.uni(counts, steps = NULL, nci.methods = FALSE,
 Time series accelerometer counts vector
 }
   \item{steps}{
-Steps vector; must be same length as counts (if specified).
+Steps vector. If specified, must be same length as counts.
 }
   \item{nci.methods}{
 If TRUE, inputs are set to replicate the data processing methods used by the NCI's SAS programs [2]. More specifically: 
