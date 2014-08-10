@@ -30,28 +30,7 @@ Steps vector; must be same length as counts (if specified).
   \item{nci.methods}{
 If TRUE, inputs are set to replicate the data processing methods used by the NCI's SAS programs [2]. More specifically: 
 
-valid.days = 4
-valid.week.days = 0
-valid.weekend.days = 0
-int.cuts = c(100, 760, 2020, 5999)
-cpm.nci = TRUE
-days.distinct = TRUE
-nonwear.window = 60
-nonwear.tol = 2
-nonwear.tol.upper = 100
-nonwear.nci = TRUE
-weartime.minimum = 600
-weartime.maximum = 1440
-partialday.minimum = 1440
-active.bout.length = 10
-active.bout.tol = 2
-mvpa.bout.tol.lower = 0
-vig.bout.tol.lower = 0
-active.bout.nci = TRUE
-sed.bout.tol = 0
-sed.bout.tol.maximum = 759
-artifact.thresh = 32767
-artifact.action = 3. 
+valid.days = 4; valid.week.days = 0; valid.weekend.days = 0; int.cuts = c(100, 760, 2020, 5999); cpm.nci = TRUE; days.distinct = TRUE; nonwear.window = 60; nonwear.tol = 2; nonwear.tol.upper = 100; nonwear.nci = TRUE; weartime.minimum = 600; weartime.maximum = 1440; partialday.minimum = 1440; active.bout.length = 10; active.bout.tol = 2; mvpa.bout.tol.lower = 0; vig.bout.tol.lower = 0; active.bout.nci = TRUE; sed.bout.tol = 0; sed.bout.tol.maximum = 759; artifact.thresh = 32767; artifact.action = 3
 
 Even if nci.methods is set to TRUE, the user can specify non-default values for brevity, weekday.weekend, and return.form.
 }

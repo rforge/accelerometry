@@ -13,10 +13,10 @@ This package contains a collection of functions that perform operations on time-
 Package: \tab accelerometry\cr
 Type: \tab Package\cr
 Version: \tab 2.2.2\cr
-Date: \tab 2014-08-09\cr
+Date: \tab 2014-08-10\cr
 License: \tab GPL-2\cr
 }
-The following functions are contained in the package accelerometry:
+The following functions are included in the package:
 
 \code{\link{accel.artifacts}},
 \code{\link{accel.bouts}},
