@@ -3,7 +3,7 @@
 \alias{accelerometry}
 \docType{package}
 \title{
-Functions for processing minute-to-minute accelerometer data
+Functions for Processing Minute-to-Minute Accelerometer Data
 }
 \description{
 This package contains a collection of functions that perform operations on time-series accelerometer data, such as identify non-wear time, flag minutes that are part of an activity bout, and find the maximum 10-minute average count value. The functions are generally very flexible, allowing for a variety of algorithms to be implemented. Most of the functions are written in C++ for efficiency.
@@ -12,8 +12,8 @@ This package contains a collection of functions that perform operations on time-
 \tabular{ll}{
 Package: \tab accelerometry\cr
 Type: \tab Package\cr
-Version: \tab 2.2.2\cr
-Date: \tab 2014-08-12\cr
+Version: \tab 2.2.3\cr
+Date: \tab 2014-10-14\cr
 License: \tab GPL-2\cr
 }
 The following functions are included in the package:
