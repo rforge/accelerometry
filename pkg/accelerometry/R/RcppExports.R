@@ -139,6 +139,12 @@ accel.bouts <- function(counts, weartime = NULL, bout.length = 10, thresh.lower 
       stop("For days.distinct input, please enter either TRUE or FALSE")
     }
     
+    # If tol > 0, nci = FALSE, and tol.lower = 0, output warning
+    if (tol > 0 & nci == FALSE & tol.lower == 0) {
+      message("Specifying a non-zero for tol.lower is highly recommended; 
+               otherwise, bout durations will frequently be over-estimated")
+    }
+    
   }
   
   # If upper thresholds are set to Inf, change to 1 million for purposes of C++ code
