@@ -13,7 +13,7 @@ This package contains a collection of functions that perform operations on time-
 Package: \tab accelerometry\cr
 Type: \tab Package\cr
 Version: \tab 2.2.3\cr
-Date: \tab 2014-11-16\cr
+Date: \tab 2014-11-22\cr
 License: \tab GPL-2\cr
 }
 The following functions are included in the package:

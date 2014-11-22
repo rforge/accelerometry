@@ -1,8 +1,5 @@
 # Run accelerometry code from paper in The R Journal
 
-# Load package
-library("accelerometry")
-
 # Load four-column matrix with counts and steps over 7 days
 data(tridata)
 
