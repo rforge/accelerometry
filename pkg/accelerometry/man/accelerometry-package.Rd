@@ -12,7 +12,7 @@ A collection of functions that perform operations on time-series accelerometer d
 \tabular{ll}{
 Package: \tab accelerometry\cr
 Type: \tab Package\cr
-Version: \tab 2.2.3\cr
+Version: \tab 2.2.4\cr
 Date: \tab 2014-12-03\cr
 License: \tab GPL-2\cr
 }
