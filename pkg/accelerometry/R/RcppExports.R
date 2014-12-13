@@ -218,10 +218,11 @@ accel.intensities <- function(counts, thresh = c(100, 760, 2020, 5999), skipchec
     
   }
   
-  # Convert counts and weartime to vectors of integers (if not already)
-  if (!is.integer(counts)) {
-    counts <- as.integer(counts)
-  }
+# # Commented out on 12/13/14 after deciding that non-integer count values should be allowed
+#   # Convert counts and weartime to vectors of integers (if not already)
+#   if (!is.integer(counts)) {
+#     counts <- as.integer(counts)
+#   }
   
   # Pass values to C++ function intensities_c
   .Call('accelerometry_intensities', PACKAGE = 'accelerometry', counts, thresh)
