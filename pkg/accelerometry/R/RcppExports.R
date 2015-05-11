@@ -1444,7 +1444,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, nci.methods = FALSE,
   dayvars <- matrix(NA, ncol = 124, nrow = numdays)
   
   # Calculate triaxial sum and vector magnitude and add to counts.tri
-  counts.tri <- cbind(counts.tri, .rowSums(X = counts.tri, m = datalength, n = 3),
+  counts.tri <- cbind(counts.tri, .rowSums(counts.tri, m = datalength, n = 3),
                       sqrt(counts.tri[,1]^2+counts.tri[,2]^2+counts.tri[,3]^2))
   
   # Add column names to counts matrix
@@ -1619,7 +1619,7 @@ accel.process.tri <- function(counts.tri, steps = NULL, nci.methods = FALSE,
     day.counts.valid <- day.counts[day.wearflag == 1,, drop = FALSE]
     
     # Total counts during wear time in each axis
-    dayvars[i,5:9] <- .colSums(X = day.counts.valid, m = daywear, n = 5)
+    dayvars[i,5:9] <- .colSums(day.counts.valid, m = daywear, n = 5)
     
     # Counts per minute
     dayvars[i,10:14] <- dayvars[i,5:9]/dayvars[i,4]
